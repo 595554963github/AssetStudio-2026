@@ -64,6 +64,7 @@
   <ItemGroup>
     <PackageReference Include="AFSLib" Version="1.1.1" />
     <PackageReference Include="CriFsV2Lib" Version="2.1.2" />
+    <PackageReference Include="lz4net" Version="1.0.15.93" />
     <PackageReference Include="SharpZipLib" Version="1.4.2" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="OpenTK" Version="4.8.0" />
