@@ -82,43 +82,34 @@ namespace AssetStudio
 
         private void Load(string[] files)
         {
-            // ±éÀúÎÄ¼şÊı×é£¬»º´æÎÄ¼şÂ·¾¶ºÍÃû³ÆÒÔ¹ıÂËÖØ¸´Ïî
             foreach (var file in files)
             {
-                Logger.Verbose($"»º´æ{file}Â·¾¶ºÍÃû³ÆÒÔ¹ıÂËµôÖØ¸´Ïî");
+                Logger.Verbose($"ç¼“å­˜{file}è·¯å¾„å’Œåç§°ä»¥è¿‡æ»¤æ‰é‡å¤é¡¹");
                 importFiles.Add(file);
                 importFilesHash.Add(Path.GetFileName(file));
             }
 
-            // ÖØÖÃ½ø¶È
             Progress.Reset();
 
-            // Ê¹ÓÃ for Ñ­»·£¬ÒòÎªÁĞ±í´óĞ¡¿ÉÄÜ»á¸Ä±ä
             for (var i = 0; i < importFiles.Count; i++)
             {
-                // ¼ÓÔØµ¥¸öÎÄ¼ş
                 LoadFile(importFiles[i]);
-                // ±¨¸æ½ø¶È
                 Progress.Report(i + 1, importFiles.Count);
 
-                // ¼ì²éÊÇ·ñÇëÇóÈ¡Ïû¼ÓÔØ
                 if (tokenSource.IsCancellationRequested)
                 {
-                    Logger.Info("¼ÓÔØÎÄ¼şÒÑÖĞÖ¹!!");
+                    Logger.Info("åŠ è½½æ–‡ä»¶å·²ä¸­æ­¢!!");
                     break;
                 }
             }
 
-            // Çå¿Õ»º´æÁĞ±í
             importFiles.Clear();
             importFilesHash.Clear();
             noexistFiles.Clear();
             assetsFileListHash.Clear();
 
-            // ÇåÀíÆ«ÒÆÁ¿
             AssetsHelper.ClearOffsets();
 
-            // ¸ù¾İÌõ¼ş¶ÁÈ¡ºÍ´¦Àí×Ê²ú
             if (!SkipProcess)
             {
                 ReadAssets();
@@ -178,7 +169,7 @@ namespace AssetStudio
         {
             if (!assetsFileListHash.Contains(reader.FileName))
             {
-                Logger.Info($"¼ÓÔØÖĞ{reader.FullPath}");
+                Logger.Info($"åŠ è½½ä¸­{reader.FullPath}");
                 try
                 {
                     var assetsFile = new SerializedFile(reader, this);
@@ -188,7 +179,7 @@ namespace AssetStudio
 
                     foreach (var sharedFile in assetsFile.m_Externals)
                     {
-                        Logger.Verbose($"{assetsFile.fileName} ĞèÒªÍâ²¿ÎÄ¼ş{sharedFile.fileName},ÊÔÍ¼²éÕÒËü...");
+                        Logger.Verbose($"{assetsFile.fileName} éœ€è¦å¤–éƒ¨æ–‡ä»¶{sharedFile.fileName},è¯•å›¾æŸ¥æ‰¾å®ƒ...");
                         var sharedFileName = sharedFile.fileName;
 
                         if (!importFilesHash.Contains(sharedFileName))
@@ -201,7 +192,7 @@ namespace AssetStudio
                                     var findFiles = Directory.GetFiles(Path.GetDirectoryName(reader.FullPath), sharedFileName, SearchOption.AllDirectories);
                                     if (findFiles.Length > 0)
                                     {
-                                        Logger.Verbose($"ÕÒµ½{findFiles.Length}Æ¥ÅäÎÄ¼ş,ÌôÑ¡µÚÒ»¸öÎÄ¼ş{findFiles[0]} !!");
+                                        Logger.Verbose($"æ‰¾åˆ°{findFiles.Length}åŒ¹é…æ–‡ä»¶,æŒ‘é€‰ç¬¬ä¸€ä¸ªæ–‡ä»¶{findFiles[0]} !!");
                                         sharedFilePath = findFiles[0];
                                     }
                                 }
@@ -212,7 +203,7 @@ namespace AssetStudio
                                 }
                                 else
                                 {
-                                    Logger.Verbose("Ê²Ã´Ò²Ã»ÕÒµ½£¬»º´æµ½²»´æÔÚµÄÎÄ¼şÖĞÒÔ±ÜÃâÖØ¸´ËÑË÷!!");
+                                    Logger.Verbose("ä»€ä¹ˆä¹Ÿæ²¡æ‰¾åˆ°ï¼Œç¼“å­˜åˆ°ä¸å­˜åœ¨çš„æ–‡ä»¶ä¸­ä»¥é¿å…é‡å¤æœç´¢!!");
                                     noexistFiles.Add(sharedFilePath);
                                 }
                             }
@@ -221,13 +212,13 @@ namespace AssetStudio
                 }
                 catch (Exception e)
                 {
-                    Logger.Error($"¶ÁÈ¡×ÊÔ´ÎÄ¼şÊ±³ö´í{reader.FullPath}", e);
+                    Logger.Error($"è¯»å–èµ„æºæ–‡ä»¶æ—¶å‡ºé”™{reader.FullPath}", e);
                     reader.Dispose();
                 }
             }
             else
             {
-                Logger.Info($"Ìø¹ı{reader.FullPath}");
+                Logger.Info($"è·³è¿‡{reader.FullPath}");
                 reader.Dispose();
             }
         }
@@ -235,7 +226,7 @@ namespace AssetStudio
 
         private void LoadAssetsFromMemory(FileReader reader, string originalPath, string unityVersion = null, long originalOffset = 0)
         {
-            Logger.Verbose($"¼ÓÔØ×ÊÔ´ÎÄ¼ş{reader.FileName}Óë°æ±¾{unityVersion}´Ó{originalPath}Æ«ÒÆÁ¿0x{originalOffset:X8}");
+            Logger.Verbose($"åŠ è½½èµ„æºæ–‡ä»¶{reader.FileName}ä¸ç‰ˆæœ¬{unityVersion}ä»{originalPath}åç§»é‡0x{originalOffset:X8}");
             if (!assetsFileListHash.Contains(reader.FileName))
             {
                 try
@@ -253,19 +244,19 @@ namespace AssetStudio
                 }
                 catch (Exception e)
                 {
-                    Logger.Error($"¶ÁÈ¡×ÊÔ´ÎÄ¼şÊ±³ö´í{reader.FullPath}´Ó{Path.GetFileName(originalPath)}", e);
+                    Logger.Error($"è¯»å–èµ„æºæ–‡ä»¶æ—¶å‡ºé”™{reader.FullPath}ä»{Path.GetFileName(originalPath)}", e);
                     resourceFileReaders.TryAdd(reader.FileName, reader);
                 }
             }
             else
-                Logger.Info($"Ìø¹ı{originalPath} ({reader.FileName})");
+                Logger.Info($"è·³è¿‡{originalPath} ({reader.FileName})");
         }
 
         private void LoadBundleFile(FileReader reader, string originalPath = null, long originalOffset = 0, bool log = true)
         {
             if (log)
             {
-                Logger.Info("¼ÓÔØÖĞ" + reader.FullPath);
+                Logger.Info("åŠ è½½ä¸­" + reader.FullPath);
             }
             try
             {
@@ -280,21 +271,21 @@ namespace AssetStudio
                     }
                     else
                     {
-                        Logger.Verbose("»º´æ×ÊÔ´Á÷");
+                        Logger.Verbose("ç¼“å­˜èµ„æºæµ");
                         resourceFileReaders.TryAdd(file.fileName, subReader); //TODO
                     }
                 }
             }
             catch (InvalidCastException)
             {
-                Logger.Error($"ÓÎÏ·ÀàĞÍ²»Æ¥Åä,Ô¤ÆÚ{nameof(Mr0k)}µ«µÃµ½ÁË{Game.Name} ({Game.GetType().Name}) !!");
+                Logger.Error($"æ¸¸æˆç±»å‹ä¸åŒ¹é…,é¢„æœŸ{nameof(Mr0k)}ä½†å¾—åˆ°äº†{Game.Name} ({Game.GetType().Name}) !!");
             }
             catch (Exception e)
             {
-                var str = $"¶ÁÈ¡À¦°óÎÄ¼şÊ±³ö´í{reader.FullPath}";
+                var str = $"è¯»å–æ†ç»‘æ–‡ä»¶æ—¶å‡ºé”™{reader.FullPath}";
                 if (originalPath != null)
                 {
-                    str += $"´Ó{Path.GetFileName(originalPath)}";
+                    str += $"ä»{Path.GetFileName(originalPath)}";
                 }
                 Logger.Error(str, e);
             }
@@ -306,7 +297,7 @@ namespace AssetStudio
 
         private void LoadWebFile(FileReader reader)
         {
-            Logger.Info("¼ÓÔØÖĞ" + reader.FullPath);
+            Logger.Info("åŠ è½½ä¸­" + reader.FullPath);
             try
             {
                 var webFile = new WebFile(reader);
@@ -326,7 +317,7 @@ namespace AssetStudio
                             LoadWebFile(subReader);
                             break;
                         case FileType.ResourceFile:
-                            Logger.Verbose("»º´æ×ÊÔ´Á÷");
+                            Logger.Verbose("ç¼“å­˜èµ„æºæµ");
                             resourceFileReaders.TryAdd(file.fileName, subReader); //TODO
                             break;
                     }
@@ -334,7 +325,7 @@ namespace AssetStudio
             }
             catch (Exception e)
             {
-                Logger.Error($"¶ÁÈ¡WebÎÄ¼şÊ±³ö´í{reader.FullPath}", e);
+                Logger.Error($"è¯»å–Webæ–‡ä»¶æ—¶å‡ºé”™{reader.FullPath}", e);
             }
             finally
             {
@@ -344,13 +335,13 @@ namespace AssetStudio
 
         private void LoadZipFile(FileReader reader)
         {
-            Logger.Info("¼ÓÔØÖĞ" + reader.FileName);
+            Logger.Info("åŠ è½½ä¸­" + reader.FileName);
             try
             {
                 using (ZipArchive archive = new ZipArchive(reader.BaseStream, ZipArchiveMode.Read))
                 {
                     List<string> splitFiles = new List<string>();
-                    Logger.Verbose("ÔÚ½âÎö×Ê²úÖ®Ç°×¢²áËùÓĞÎÄ¼ş£¬ÒÔ±ã¿ÉÒÔÕÒµ½Íâ²¿ÒıÓÃ²¢ÕÒµ½²ğ·ÖÎÄ¼ş");
+                    Logger.Verbose("åœ¨è§£æèµ„äº§ä¹‹å‰æ³¨å†Œæ‰€æœ‰æ–‡ä»¶ï¼Œä»¥ä¾¿å¯ä»¥æ‰¾åˆ°å¤–éƒ¨å¼•ç”¨å¹¶æ‰¾åˆ°æ‹†åˆ†æ–‡ä»¶");
                     foreach (ZipArchiveEntry entry in archive.Entries)
                     {
                         if (entry.Name.Contains(".split"))
@@ -369,7 +360,7 @@ namespace AssetStudio
                         }
                     }
 
-                    Logger.Verbose("ºÏ²¢²ğ·ÖÎÄ¼ş²¢¼ÓÔØ½á¹û");
+                    Logger.Verbose("åˆå¹¶æ‹†åˆ†æ–‡ä»¶å¹¶åŠ è½½ç»“æœ");
                     foreach (string basePath in splitFiles)
                     {
                         try
@@ -394,18 +385,18 @@ namespace AssetStudio
                         }
                         catch (Exception e)
                         {
-                            Logger.Error($"¶ÁÈ¡zip²ğ·ÖÎÄ¼şÊ±³ö´í{basePath}", e);
+                            Logger.Error($"è¯»å–zipæ‹†åˆ†æ–‡ä»¶æ—¶å‡ºé”™{basePath}", e);
                         }
                     }
 
-                    Logger.Verbose("¼ÓÔØËùÓĞÌõÄ¿");
-                    Logger.Verbose($"ÕÒµ½{archive.Entries.Count}ÌõÄ¿");
+                    Logger.Verbose("åŠ è½½æ‰€æœ‰æ¡ç›®");
+                    Logger.Verbose($"æ‰¾åˆ°{archive.Entries.Count}æ¡ç›®");
                     foreach (ZipArchiveEntry entry in archive.Entries)
                     {
                         try
                         {
                             string dummyPath = Path.Combine(Path.GetDirectoryName(reader.FullPath), reader.FileName, entry.FullName);
-                            Logger.Verbose("´´½¨Ò»¸öĞÂÁ÷À´´æ´¢·ÅÆøµÄÁ÷²¢±£ÁôÊı¾İÒÔ¹©ÒÔºóÌáÈ¡");
+                            Logger.Verbose("åˆ›å»ºä¸€ä¸ªæ–°æµæ¥å­˜å‚¨æ”¾æ°”çš„æµå¹¶ä¿ç•™æ•°æ®ä»¥ä¾›ä»¥åæå–");
                             Stream streamReader = new MemoryStream();
                             using (Stream entryStream = entry.Open())
                             {
@@ -419,20 +410,20 @@ namespace AssetStudio
                             if (entryReader.FileType == FileType.ResourceFile)
                             {
                                 entryReader.Position = 0;
-                                Logger.Verbose("»º´æ×ÊÔ´Á÷");
+                                Logger.Verbose("ç¼“å­˜èµ„æºæµ");
                                 resourceFileReaders.TryAdd(entry.Name, entryReader);
                             }
                         }
                         catch (Exception e)
                         {
-                            Logger.Error($"¶ÁÈ¡zipÌõÄ¿Ê±³ö´í{entry.FullName}", e);
+                            Logger.Error($"è¯»å–zipæ¡ç›®æ—¶å‡ºé”™{entry.FullName}", e);
                         }
                     }
                 }
             }
             catch (Exception e)
             {
-                Logger.Error($"¶ÁÈ¡zipÌõÄ¿Ê±³ö´í{reader.FileName}", e);
+                Logger.Error($"è¯»å–zipæ¡ç›®æ—¶å‡ºé”™{reader.FileName}", e);
             }
             finally
             {
@@ -441,14 +432,14 @@ namespace AssetStudio
         }
         private void LoadBlockFile(FileReader reader)
         {
-            Logger.Info("¼ÓÔØÖĞ" + reader.FullPath);
+            Logger.Info("åŠ è½½ä¸­" + reader.FullPath);
             try
             {
                 using var stream = new OffsetStream(reader.BaseStream, 0);
                 foreach (var offset in stream.GetOffsets(reader.FullPath))
                 {
                     var name = offset.ToString("X8");
-                    Logger.Info($"¼ÓÔØ¿é{name}");
+                    Logger.Info($"åŠ è½½å—{name}");
 
                     var dummyPath = Path.Combine(Path.GetDirectoryName(reader.FullPath), name);
                     var subReader = new FileReader(dummyPath, stream, true);
@@ -469,7 +460,7 @@ namespace AssetStudio
             }
             catch (Exception e)
             {
-                Logger.Error($"¶ÁÈ¡¿éÎÄ¼şÊ±³ö´í{reader.FileName}", e);
+                Logger.Error($"è¯»å–å—æ–‡ä»¶æ—¶å‡ºé”™{reader.FileName}", e);
             }
             finally
             {
@@ -478,14 +469,14 @@ namespace AssetStudio
         }
         private void LoadBlkFile(FileReader reader)
         {
-            Logger.Info("¼ÓÔØÖĞ" + reader.FullPath);
+            Logger.Info("åŠ è½½ä¸­" + reader.FullPath);
             try
             {
                 using var stream = BlkUtils.Decrypt(reader, (Blk)Game);
                 foreach (var offset in stream.GetOffsets(reader.FullPath))
                 {
                     var name = offset.ToString("X8");
-                    Logger.Info($"¼ÓÔØ¿é{name}");
+                    Logger.Info($"åŠ è½½å—{name}");
 
                     var dummyPath = Path.Combine(Path.GetDirectoryName(reader.FullPath), name);
                     var subReader = new FileReader(dummyPath, stream, true);
@@ -502,11 +493,11 @@ namespace AssetStudio
             }
             catch (InvalidCastException)
             {
-                Logger.Error($"ÓÎÏ·ÀàĞÍ²»Æ¥Åä,Ô¤ÆÚ{nameof(Blk)} µ«µÃµ½ÁË{Game.Name} ({Game.GetType().Name}) !!");
+                Logger.Error($"æ¸¸æˆç±»å‹ä¸åŒ¹é…,é¢„æœŸ{nameof(Blk)} ä½†å¾—åˆ°äº†{Game.Name} ({Game.GetType().Name}) !!");
             }
             catch (Exception e)
             {
-                Logger.Error($"¶ÁÈ¡blkÎÄ¼şÊ±³ö´í{reader.FileName}", e);
+                Logger.Error($"è¯»å–blkæ–‡ä»¶æ—¶å‡ºé”™{reader.FileName}", e);
             }
             finally
             {
@@ -517,12 +508,12 @@ namespace AssetStudio
         {
             if (log)
             {
-                Logger.Info("¼ÓÔØÖĞ" + reader.FullPath);
+                Logger.Info("åŠ è½½ä¸­" + reader.FullPath);
             }
             try
             {
                 var mhyFile = new MhyFile(reader, (Mhy)Game);
-                Logger.Verbose($"Ã×¹şÓÎÎÄ¼ş×Ü´óĞ¡:{mhyFile.m_Header.size:X8}");
+                Logger.Verbose($"ç±³å“ˆæ¸¸æ–‡ä»¶æ€»å¤§å°:{mhyFile.m_Header.size:X8}");
                 foreach (var file in mhyFile.fileList)
                 {
                     var dummyPath = Path.Combine(Path.GetDirectoryName(reader.FullPath), file.fileName);
@@ -533,21 +524,21 @@ namespace AssetStudio
                     }
                     else
                     {
-                        Logger.Verbose("»º´æ×ÊÔ´Á÷");
+                        Logger.Verbose("ç¼“å­˜èµ„æºæµ");
                         resourceFileReaders.TryAdd(file.fileName, cabReader); //TODO
                     }
                 }
             }
             catch (InvalidCastException)
             {
-                Logger.Error($"ÓÎÏ·ÀàĞÍ²»Æ¥Åä,Ô¤ÆÚ{nameof(Mhy)}µ«µÃµ½ÁË{Game.Name} ({Game.GetType().Name}) !!");
+                Logger.Error($"æ¸¸æˆç±»å‹ä¸åŒ¹é…,é¢„æœŸ{nameof(Mhy)}ä½†å¾—åˆ°äº†{Game.Name} ({Game.GetType().Name}) !!");
             }
             catch (Exception e)
             {
-                var str = $"¶ÁÈ¡Ã×¹şÓÎÎÄ¼şÊ±³ö´í{reader.FullPath}";
+                var str = $"è¯»å–ç±³å“ˆæ¸¸æ–‡ä»¶æ—¶å‡ºé”™{reader.FullPath}";
                 if (originalPath != null)
                 {
-                    str += $"´Ó{Path.GetFileName(originalPath)}";
+                    str += $"ä»{Path.GetFileName(originalPath)}";
                 }
                 Logger.Error(str, e);
             }
@@ -561,7 +552,7 @@ namespace AssetStudio
         {
             if (log)
             {
-                Logger.Info("ÕıÔÚ¼ÓÔØ" + reader.FullPath);
+                Logger.Info("æ­£åœ¨åŠ è½½" + reader.FullPath);
             }
             try
             {
@@ -576,14 +567,14 @@ namespace AssetStudio
                     }
                     else
                     {
-                        Logger.Verbose("»º´æ×ÊÔ´Á÷");
+                        Logger.Verbose("ç¼“å­˜èµ„æºæµ");
                         resourceFileReaders.TryAdd(file.fileName, cabReader); //TODO
                     }
                 }
             }
             catch (Exception e)
             {
-                var str = $"¶ÁÈ¡BlbÎÄ¼şÊ±³ö´í{reader.FullPath}";
+                var str = $"è¯»å–Blbæ–‡ä»¶æ—¶å‡ºé”™{reader.FullPath}";
                 if (originalPath != null)
                 {
                     str += $" from {Path.GetFileName(originalPath)}";
@@ -600,7 +591,7 @@ namespace AssetStudio
         {
             if (assetsFile.IsVersionStripped && string.IsNullOrEmpty(SpecifyUnityVersion))
             {
-                throw new Exception("Unity°æ±¾ÒÑ±»°şÀë,ÇëÔÚÑ¡ÏîÖĞÉèÖÃ°æ±¾");
+                throw new Exception("Unityç‰ˆæœ¬å·²è¢«å‰¥ç¦»,è¯·åœ¨é€‰é¡¹ä¸­è®¾ç½®ç‰ˆæœ¬");
             }
             if (!string.IsNullOrEmpty(SpecifyUnityVersion))
             {
@@ -610,7 +601,7 @@ namespace AssetStudio
 
         public void Clear()
         {
-            Logger.Verbose("Çå¿Õ...");
+            Logger.Verbose("æ¸…ç©º...");
 
             foreach (var assetsFile in assetsFileList)
             {
@@ -636,7 +627,7 @@ namespace AssetStudio
 
         private void ReadAssets()
         {
-            Logger.Info("¶ÁÈ¡×ÊÔ´...");
+            Logger.Info("è¯»å–èµ„æº...");
 
             var progressCount = assetsFileList.Sum(x => x.m_Objects.Count);
             int i = 0;
@@ -647,7 +638,7 @@ namespace AssetStudio
                 {
                     if (tokenSource.IsCancellationRequested)
                     {
-                        Logger.Info("¶ÁÈ¡×ÊÔ´ÒÑ±»È¡Ïû!!");
+                        Logger.Info("è¯»å–èµ„æºå·²è¢«å–æ¶ˆ!!");
                         return;
                     }
                     var objectReader = new ObjectReader(assetsFile.reader, assetsFile, objectInfo, Game);
@@ -692,11 +683,11 @@ namespace AssetStudio
                     catch (Exception e)
                     {
                         var sb = new StringBuilder();
-                        sb.AppendLine("ÎŞ·¨¼ÓÔØ¶ÔÏó")
-                            .AppendLine($"×ÊÔ´{assetsFile.fileName}")
-                            .AppendLine($"Â·¾¶{assetsFile.originalPath}")
-                            .AppendLine($"ÀàĞÍ{objectReader.type}")
-                            .AppendLine($"Â·¾¶ID {objectInfo.m_PathID}")
+                        sb.AppendLine("æ— æ³•åŠ è½½å¯¹è±¡")
+                            .AppendLine($"èµ„æº{assetsFile.fileName}")
+                            .AppendLine($"è·¯å¾„{assetsFile.originalPath}")
+                            .AppendLine($"ç±»å‹{objectReader.type}")
+                            .AppendLine($"è·¯å¾„ID {objectInfo.m_PathID}")
                             .Append(e);
                         Logger.Error(sb.ToString());
                     }
@@ -708,7 +699,7 @@ namespace AssetStudio
 
         private void ProcessAssets()
         {
-            Logger.Info("´¦Àí×ÊÔ´...");
+            Logger.Info("å¤„ç†èµ„æº...");
 
             foreach (var assetsFile in assetsFileList)
             {
@@ -716,12 +707,12 @@ namespace AssetStudio
                 {
                     if (tokenSource.IsCancellationRequested)
                     {
-                        Logger.Info("´¦Àí×ÊÔ´ÒÑ±»È¡Ïû!!");
+                        Logger.Info("å¤„ç†èµ„æºå·²è¢«å–æ¶ˆ!!");
                         return;
                     }
                     if (obj is GameObject m_GameObject)
                     {
-                        Logger.Verbose($"GameObject with {m_GameObject.m_PathID} in file {m_GameObject.assetsFile.fileName} has {m_GameObject.m_Components.Count} components,ÊÔÍ¼È¥È¡ËüÃÇ...");
+                        Logger.Verbose($"GameObject with {m_GameObject.m_PathID} in file {m_GameObject.assetsFile.fileName} has {m_GameObject.m_Components.Count} components,è¯•å›¾å»å–å®ƒä»¬...");
                         foreach (var pptr in m_GameObject.m_Components)
                         {
                             if (pptr.TryGet(out var m_Component))
@@ -729,27 +720,27 @@ namespace AssetStudio
                                 switch (m_Component)
                                 {
                                     case Transform m_Transform:
-                                        Logger.Verbose($"ÔÚÎÄ¼şÀï»ñÈ¡±ä»»×é¼ş{m_Transform.m_PathID}{m_Transform.assetsFile.fileName},·ÖÅä¸øGameObject×é¼ş...");
+                                        Logger.Verbose($"åœ¨æ–‡ä»¶é‡Œè·å–å˜æ¢ç»„ä»¶{m_Transform.m_PathID}{m_Transform.assetsFile.fileName},åˆ†é…ç»™GameObjectç»„ä»¶...");
                                         m_GameObject.m_Transform = m_Transform;
                                         break;
                                     case MeshRenderer m_MeshRenderer:
-                                        Logger.Verbose($"ÔÚÎÄ¼şÀï»ñÈ¡Íø¸ñäÖÈ¾×é¼ş{m_MeshRenderer.m_PathID}{m_MeshRenderer.assetsFile.fileName},·ÖÅä¸øGameObject×é¼ş...");
+                                        Logger.Verbose($"åœ¨æ–‡ä»¶é‡Œè·å–ç½‘æ ¼æ¸²æŸ“ç»„ä»¶{m_MeshRenderer.m_PathID}{m_MeshRenderer.assetsFile.fileName},åˆ†é…ç»™GameObjectç»„ä»¶...");
                                         m_GameObject.m_MeshRenderer = m_MeshRenderer;
                                         break;
                                     case MeshFilter m_MeshFilter:
-                                        Logger.Verbose($"ÔÚÎÄ¼şÀï»ñÈ¡Íø¸ñ¹ıÂËÆ÷×é¼ş{m_MeshFilter.m_PathID}{m_MeshFilter.assetsFile.fileName},·ÖÅä¸øGameObject×é¼ş...");
+                                        Logger.Verbose($"åœ¨æ–‡ä»¶é‡Œè·å–ç½‘æ ¼è¿‡æ»¤å™¨ç»„ä»¶{m_MeshFilter.m_PathID}{m_MeshFilter.assetsFile.fileName},åˆ†é…ç»™GameObjectç»„ä»¶...");
                                         m_GameObject.m_MeshFilter = m_MeshFilter;
                                         break;
                                     case SkinnedMeshRenderer m_SkinnedMeshRenderer:
-                                        Logger.Verbose($"ÔÚÎÄ¼şÀï»ñÈ¡ÃÉÆ¤Íø¸ñäÖÈ¾Æ÷×é¼ş{m_SkinnedMeshRenderer.m_PathID}{m_SkinnedMeshRenderer.assetsFile.fileName},·ÖÅä¸øGameObject×é¼ş...");
+                                        Logger.Verbose($"åœ¨æ–‡ä»¶é‡Œè·å–è’™çš®ç½‘æ ¼æ¸²æŸ“å™¨ç»„ä»¶{m_SkinnedMeshRenderer.m_PathID}{m_SkinnedMeshRenderer.assetsFile.fileName},åˆ†é…ç»™GameObjectç»„ä»¶...");
                                         m_GameObject.m_SkinnedMeshRenderer = m_SkinnedMeshRenderer;
                                         break;
                                     case Animator m_Animator:
-                                        Logger.Verbose($"ÔÚÎÄ¼şÀï»ñÈ¡¶¯»­Ê¦×é¼ş{m_Animator.m_PathID}{m_Animator.assetsFile.fileName},·ÖÅä¸øGameObject×é¼ş...");
+                                        Logger.Verbose($"åœ¨æ–‡ä»¶é‡Œè·å–åŠ¨ç”»å¸ˆç»„ä»¶{m_Animator.m_PathID}{m_Animator.assetsFile.fileName},åˆ†é…ç»™GameObjectç»„ä»¶...");
                                         m_GameObject.m_Animator = m_Animator;
                                         break;
                                     case Animation m_Animation:
-                                        Logger.Verbose($"ÔÚÎÄ¼şÀï»ñÈ¡¶¯»­×é¼ş{m_Animation.m_PathID}{m_Animation.assetsFile.fileName},·ÖÅä¸øGameObject×é¼ş...");
+                                        Logger.Verbose($"åœ¨æ–‡ä»¶é‡Œè·å–åŠ¨ç”»ç»„ä»¶{m_Animation.m_PathID}{m_Animation.assetsFile.fileName},åˆ†é…ç»™GameObjectç»„ä»¶...");
                                         m_GameObject.m_Animation = m_Animation;
                                         break;
                                 }
@@ -760,14 +751,14 @@ namespace AssetStudio
                     {
                         if (m_SpriteAtlas.m_RenderDataMap.Count > 0)
                         {
-                            Logger.Verbose($"SpriteAtlas with {m_SpriteAtlas.m_PathID} in file {m_SpriteAtlas.assetsFile.fileName} has {m_SpriteAtlas.m_PackedSprites.Count} packed sprites,ÊÔÍ¼È¥È¡ËüÃÇ...");
+                            Logger.Verbose($"SpriteAtlas with {m_SpriteAtlas.m_PathID} in file {m_SpriteAtlas.assetsFile.fileName} has {m_SpriteAtlas.m_PackedSprites.Count} packed sprites,è¯•å›¾å»å–å®ƒä»¬...");
                             foreach (var m_PackedSprite in m_SpriteAtlas.m_PackedSprites)
                             {
                                 if (m_PackedSprite.TryGet(out var m_Sprite))
                                 {
                                     if (m_Sprite.m_SpriteAtlas.IsNull)
                                     {
-                                        Logger.Verbose($"Fetched Sprite with {m_Sprite.m_PathID} in file {m_Sprite.assetsFile.fileName},·ÖÅä¸ø¸¸¾«ÁéÍ¼¼¯...");
+                                        Logger.Verbose($"Fetched Sprite with {m_Sprite.m_PathID} in file {m_Sprite.assetsFile.fileName},åˆ†é…ç»™çˆ¶ç²¾çµå›¾é›†...");
                                         m_Sprite.m_SpriteAtlas.Set(m_SpriteAtlas);
                                     }
                                     else
@@ -775,7 +766,7 @@ namespace AssetStudio
                                         m_Sprite.m_SpriteAtlas.TryGet(out var m_SpriteAtlaOld);
                                         if (m_SpriteAtlaOld.m_IsVariant)
                                         {
-                                            Logger.Verbose($"Fetched Sprite with {m_Sprite.m_PathID} in file {m_Sprite.assetsFile.fileName}ÓĞÒ»¸öÔ­Ê¼µÄ¾«ÁéÍ¼¼¯±äÌå,´¦Àí±äÌå²¢¹ØÁªµ½¸¸¾«ÁéÍ¼¼¯...");
+                                            Logger.Verbose($"Fetched Sprite with {m_Sprite.m_PathID} in file {m_Sprite.assetsFile.fileName}æœ‰ä¸€ä¸ªåŸå§‹çš„ç²¾çµå›¾é›†å˜ä½“,å¤„ç†å˜ä½“å¹¶å…³è”åˆ°çˆ¶ç²¾çµå›¾é›†...");
                                             m_Sprite.m_SpriteAtlas.Set(m_SpriteAtlas);
                                         }
                                     }
