@@ -1,4 +1,4 @@
-﻿using Org.Brotli.Dec;
+using Org.Brotli.Dec;
 using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
@@ -11,6 +11,7 @@ using System.Security.Cryptography;
 using System.Text;
 using static AssetStudio.BundleFile;
 using static AssetStudio.Crypto;
+using System.Runtime.InteropServices;
 
 namespace AssetStudio
 {
@@ -1141,7 +1142,7 @@ namespace AssetStudio
             ms.Position = 0;
             return new FileReader(reader.FullPath, ms);
         }
-        public static FileReader Decryptwuqimitu(FileReader reader)
+        public static FileReader DecryptWuqimitu(FileReader reader)
         {
             Logger.Verbose($"尝试去解密{reader.FileName}加密的无期迷途");
 
@@ -1166,6 +1167,161 @@ namespace AssetStudio
             ms.Position = 0;
             Logger.Verbose("解密无期迷途成功!!");
             return new FileReader(reader.FullPath, ms);
+        }
+
+        private static void Xor(this Span<byte> data, ReadOnlySpan<byte> key)
+        {
+            var remaining = data.Length;
+            var processed = 0;
+
+            if (key.Length >= 8 && remaining >= 8)
+            {
+                var dataULong = MemoryMarshal.Cast<byte, ulong>(data);
+                var keyULong = MemoryMarshal.Cast<byte, ulong>(key);
+
+                var dataULongCount = dataULong.Length;
+                var keyULongCount = keyULong.Length;
+                for (int i = 0; i < dataULongCount; i++)
+                {
+                    dataULong[i] ^= keyULong[i % keyULongCount];
+                }
+
+                var totalProcessed = dataULongCount * sizeof(ulong);
+                processed += totalProcessed;
+                remaining -= totalProcessed;
+            }
+
+            if (remaining > 0)
+            {
+                for (int i = processed; i < data.Length; i++)
+                {
+                    data[i] ^= key[i % key.Length];
+                }
+            }
+        }
+        public static FileReader DecryptHuoyingrenzhe(FileReader reader)
+        {
+            Logger.Verbose($"尝试去解密火影忍者加密的文件{reader.FileName}");
+
+            var MagicVersionMap = new Dictionary<string, int>
+            {
+                ["UnityKHFS"] = 0,
+                ["UnityKHNFS"] = 1,
+                ["UnityKH1FS"] = 2
+            };
+
+            var magic = reader.ReadStringToNull(11);
+            if (!MagicVersionMap.TryGetValue(magic, out var encVersion))
+            {
+                Logger.Verbose($"未知的魔法签名{magic}, 终止操作...");
+                reader.Position = 0;
+                return reader;
+            }
+            reader.Position -= 1;
+
+            var headerData = (stackalloc byte[0x1f]);
+            reader.Read(headerData);
+
+            var blocksSizeBytes = (stackalloc byte[0xc]);
+            reader.Read(blocksSizeBytes);
+
+            var blocksSize = BinaryPrimitives.ReadUInt32BigEndian(blocksSizeBytes);
+
+            reader.Position += encVersion == 0 ? 0xc : 0xb;
+
+            var blocks = new byte[blocksSize];
+            reader.Read(blocks);
+
+            var encSpan = blocks.AsSpan();
+
+            var bigEndianBlocksSize = (stackalloc byte[8]);
+            BinaryPrimitives.WriteUInt64BigEndian(bigEndianBlocksSize, blocksSize);
+
+            switch (encVersion)
+            {
+                case 0:
+                    encSpan.Xor(GetKey(encVersion));
+                    break;
+                case 1:
+                    encSpan.Xor(GetKey(encVersion));
+                    encSpan.Xor(bigEndianBlocksSize);
+                    break;
+                case 2:
+                    var alignedLength = (encSpan.Length % 7 + 7) % encSpan.Length;
+                    Version2Transform(encSpan, 0, encSpan.Length, alignedLength);
+
+                    var currentKey = GetKey(blocksSize % 3 == 0 || blocksSize % 5 == 0 || blocksSize % 7 == 0 ? 1 : 0);
+                    encSpan.Xor(currentKey);
+                    encSpan.Xor(bigEndianBlocksSize);
+
+                    var endOffset = (encSpan.Length % 7 + 1) % alignedLength;
+                    for (int i = 0; i < encSpan.Length; i += alignedLength)
+                        Version2Transform(encSpan, i, alignedLength, endOffset);
+
+                    Version2Transform(encSpan, 0, encSpan.Length, endOffset);
+                    break;
+            }
+
+            var zeroSpan = (stackalloc byte[0xe]);
+            zeroSpan.Clear();
+
+            var ms = new MemoryStream();
+            ms.Write(Encoding.UTF8.GetBytes("UnityFS"));
+            ms.Write(headerData);
+            ms.Write(blocksSizeBytes);
+            ms.Write(zeroSpan);
+            ms.Write(encSpan);
+            reader.BaseStream.CopyTo(ms);
+
+            ms.Position = 0;
+            reader.Dispose();
+
+            Logger.Verbose("解密火影忍者成功!!");
+            return new FileReader(reader.FullPath, ms);
+        }
+
+        private static ReadOnlySpan<byte> GetKey(int keyIndex)
+        {
+            return keyIndex switch
+            {
+                0 => "X@85Pq!6v$lCt7UYsihH3!cPb1P71bo4lX59FXqY!VO$YiYsu!Keu3aVZwi5on5l"u8,
+                1 => "hAi5luE8FlyblDdCTQC9uxnj3rkNwd1swrKI7Mx1aDFEe2B5h#3X&s54%GuSeHf@"u8,
+                _ => throw new UnreachableException()
+            };
+        }
+
+        private static void Version2Transform(Span<byte> data, int offset, int length, int shiftCount)
+        {
+            var lastValidDataIndex = data.Length - 1;
+
+            offset = Math.Min(lastValidDataIndex, offset);
+            var endOffset = Math.Min(lastValidDataIndex, offset - 1 + length);
+            length = endOffset - offset + 1;
+
+            if (2 > length)
+                return;
+
+            var offsetInShift = shiftCount % length;
+            if (offsetInShift == 0)
+                return;
+
+            var shiftedEndOffset = endOffset - offsetInShift;
+
+            shiftedEndOffset = Math.Min(Math.Max(shiftedEndOffset, offset), endOffset);
+
+            Swap(data, offset, Math.Min(lastValidDataIndex, shiftedEndOffset));
+            Swap(data, Math.Min(lastValidDataIndex, shiftedEndOffset + 1), endOffset);
+            Swap(data, offset, endOffset);
+
+            static void Swap(Span<byte> data, int start, int end)
+            {
+                while (end > start)
+                {
+                    (data[end], data[start]) = (data[start], data[end]);
+                    start++;
+                    end--;
+                }
+            }
         }
     }
 }
