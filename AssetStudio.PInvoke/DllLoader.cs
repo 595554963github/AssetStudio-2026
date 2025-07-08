@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -111,7 +111,7 @@ namespace AssetStudio.PInvoke
             private static extern IntPtr DlOpen([MarshalAs(UnmanagedType.LPStr)] string fileName, int flags);
 
             // char *dlerror(void);
-            [DllImport("libdl", EntryPoint = "差错")]
+            [DllImport("libdl", EntryPoint = "dlerror")]
             private static extern IntPtr DlError();
 
             private const int RTLD_LAZY = 0x1;
