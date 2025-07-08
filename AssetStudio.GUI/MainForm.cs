@@ -1,6 +1,10 @@
-﻿
+using AssetStudio.PInvoke;
+using FMOD;
 using Newtonsoft.Json;
+using OpenTK.Audio.OpenAL;
+using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
+using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -10,17 +14,14 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows.Forms;
 using static AssetStudio.GUI.Studio;
-using OpenTK.Graphics;
-using OpenTK.Mathematics;
-using System.Text.RegularExpressions;
-using OpenTK.Audio.OpenAL;
-using System.Runtime.Versioning;
 
 namespace AssetStudio.GUI
 {
@@ -88,7 +89,7 @@ namespace AssetStudio.GUI
         [SupportedOSPlatform("windows6.1.0")]
         public MainForm()
         {
-            Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
+            System.Threading.Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
             InitializeComponent();
             Plugins.AddMenuItemsToMainForm(this);
             Text = $"AssetStudio图形用户界面{Application.ProductVersion}";
@@ -540,7 +541,7 @@ namespace AssetStudio.GUI
                         {
                             FMODpanel.Visible = !FMODpanel.Visible;
 
-                            if (sound != null && channel != null)
+                            if (sound.hasHandle() && channel.hasHandle())
                             {
                                 var result = channel.isPlaying(out var playing);
                                 if (result == FMOD.RESULT.OK && playing)
@@ -705,7 +706,7 @@ namespace AssetStudio.GUI
 
         private void sceneHierarchy_Click(object sender, EventArgs e)
         {
-            var saveFileDialog = new SaveFileDialog() { FileName = "scene.json", Filter = "场景层次转储| *.json" };
+            var saveFileDialog = new SaveFileDialog() { FileName = "scene.json", Filter = "场景层次转储|*.json" };
             if (saveFileDialog.ShowDialog(this) == DialogResult.OK)
             {
                 var path = saveFileDialog.FileName;
@@ -1099,7 +1100,7 @@ namespace AssetStudio.GUI
             result = sound.getLength(out FMODlenms, FMOD.TIMEUNIT.MS);
             if (ERRCHECK(result)) return;
 
-            result = system.playSound(sound, null, true, out channel);
+            result = system.playSound(sound, default(FMOD.ChannelGroup), true, out channel);
             if (ERRCHECK(result)) return;
 
             FMODpanel.Visible = true;
@@ -2107,7 +2108,7 @@ namespace AssetStudio.GUI
                 version = version.Split(' ')[0];
             }
 
-            Logger.Info($"正在加载AI v{version}");
+            Logger.Info($"正在加载资源索引 v{version}");
             InvokeUpdate(specifyAIVersion, false);
             var path = await AIVersionManager.FetchAI(version);
             await Task.Run(() => ResourceIndex.FromFile(path));
@@ -2497,7 +2498,7 @@ namespace AssetStudio.GUI
             if (openFileDialog.ShowDialog(this) == DialogResult.OK)
             {
                 var path = openFileDialog.FileName;
-                Logger.Info($"正在加载AI...");
+                Logger.Info($"正在加载资源索引...");
                 InvokeUpdate(loadAIToolStripMenuItem, false);
                 await Task.Run(() => ResourceIndex.FromFile(path));
                 UpdateContainers();
@@ -2581,6 +2582,7 @@ namespace AssetStudio.GUI
         #region FMOD
         private void FMODinit()
         {
+            DllLoader.PreloadDll("fmod");
             FMODreset();
 
             var result = FMOD.Factory.System_Create(out system);
@@ -2612,17 +2614,17 @@ namespace AssetStudio.GUI
             FMODstatusLabel.Text = "结束了";
             FMODinfoLabel.Text = "";
 
-            if (sound != null && sound.isValid())
+            if (!sound.Equals(default(Sound)) && sound.hasHandle())
             {
                 var result = sound.release();
                 ERRCHECK(result);
-                sound = null;
+                sound = default; 
             }
         }
 
         private void FMODplayButton_Click(object sender, EventArgs e)
         {
-            if (sound != null && channel != null)
+            if (sound.hasHandle() && channel.hasHandle())
             {
                 timer.Start();
                 var result = channel.isPlaying(out var playing);
@@ -2636,14 +2638,14 @@ namespace AssetStudio.GUI
                     result = channel.stop();
                     if (ERRCHECK(result)) { return; }
 
-                    result = system.playSound(sound, null, false, out channel);
+                    result = system.playSound(sound, default(FMOD.ChannelGroup), false, out channel);
                     if (ERRCHECK(result)) { return; }
 
                     FMODpauseButton.Text = "暂停";
                 }
                 else
                 {
-                    result = system.playSound(sound, null, false, out channel);
+                    result = system.playSound(sound, default(FMOD.ChannelGroup), false, out channel);
                     if (ERRCHECK(result)) { return; }
                     FMODstatusLabel.Text = "正在播放";
 
@@ -2664,7 +2666,7 @@ namespace AssetStudio.GUI
 
         private void FMODpauseButton_Click(object sender, EventArgs e)
         {
-            if (sound != null && channel != null)
+            if (sound.hasHandle() && channel.hasHandle())
             {
                 var result = channel.isPlaying(out var playing);
                 if ((result != FMOD.RESULT.OK) && (result != FMOD.RESULT.ERR_INVALID_HANDLE))
@@ -2697,7 +2699,7 @@ namespace AssetStudio.GUI
 
         private void FMODstopButton_Click(object sender, EventArgs e)
         {
-            if (channel != null)
+            if (channel.hasHandle())
             {
                 var result = channel.isPlaying(out var playing);
                 if ((result != FMOD.RESULT.OK) && (result != FMOD.RESULT.ERR_INVALID_HANDLE))
@@ -2726,13 +2728,13 @@ namespace AssetStudio.GUI
 
             loopMode = FMODloopButton.Checked ? FMOD.MODE.LOOP_NORMAL : FMOD.MODE.LOOP_OFF;
 
-            if (sound != null)
+            if (sound.hasHandle())
             {
                 result = sound.setMode(loopMode);
                 if (ERRCHECK(result)) { return; }
             }
 
-            if (channel != null)
+            if (channel.hasHandle())
             {
                 result = channel.isPlaying(out var playing);
                 if ((result != FMOD.RESULT.OK) && (result != FMOD.RESULT.ERR_INVALID_HANDLE))
@@ -2764,7 +2766,7 @@ namespace AssetStudio.GUI
 
         private void FMODprogressBar_Scroll(object sender, EventArgs e)
         {
-            if (channel != null)
+            if (channel.hasHandle())
             {
                 uint newms = FMODlenms / 1000 * (uint)FMODprogressBar.Value;
                 FMODtimerLabel.Text = $"{newms / 1000 / 60}:{newms / 1000 % 60}.{newms / 10 % 100}/{FMODlenms / 1000 / 60}:{FMODlenms / 1000 % 60}.{FMODlenms / 10 % 100}";
@@ -2778,7 +2780,7 @@ namespace AssetStudio.GUI
 
         private void FMODprogressBar_MouseUp(object sender, MouseEventArgs e)
         {
-            if (channel != null)
+            if (channel.hasHandle())
             {
                 uint newms = FMODlenms / 1000 * (uint)FMODprogressBar.Value;
 
@@ -2805,7 +2807,7 @@ namespace AssetStudio.GUI
             bool playing = false;
             bool paused = false;
 
-            if (channel != null)
+            if (channel.hasHandle())
             {
                 var result = channel.getPosition(out ms, FMOD.TIMEUNIT.MS);
                 if ((result != FMOD.RESULT.OK) && (result != FMOD.RESULT.ERR_INVALID_HANDLE))
@@ -2830,7 +2832,7 @@ namespace AssetStudio.GUI
             FMODprogressBar.Value = (int)(ms * 1000 / FMODlenms);
             FMODstatusLabel.Text = paused ? "已暂停" : playing ? "正在播放" : "已停止";
 
-            if (system != null && channel != null)
+            if (system.hasHandle() && channel.hasHandle())
             {
                 system.update();
             }
