@@ -7,11 +7,12 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using static AssetStudio.BundleFile;
 using static AssetStudio.Crypto;
-using System.Runtime.InteropServices;
 
 namespace AssetStudio
 {
@@ -1169,6 +1170,55 @@ namespace AssetStudio
             return new FileReader(reader.FullPath, ms);
         }
 
+        public static FileReader DecryptXinyuetongxing(FileReader reader)
+        {
+            Logger.Verbose($"尝试解密新月同行加密的文件 {reader.FileName}");
+
+            var signature = reader.ReadStringToNull(4);
+            reader.Position = 0;
+
+            if (signature == "UnityFS")
+            {
+                Logger.Verbose("文件已经是UnityFS格式，无需解密");
+                return reader;
+            }
+
+            try
+            {
+                var encryptedData = reader.ReadBytes((int)reader.Length);
+
+                var fileName = Path.GetFileNameWithoutExtension(reader.FileName);
+
+                var result = DecryptWithDll(encryptedData, fileName);
+
+                if (result == 1)
+                {
+                    Logger.Verbose("新月同行解密成功!!");
+                    return new FileReader(reader.FullPath, new MemoryStream(encryptedData));
+                }
+                else
+                {
+                    Logger.Verbose("解密失败，文件头不匹配");
+                    reader.Position = 0;
+                    return reader;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Error($"解密新月同行文件时出错: {ex.Message}");
+                reader.Position = 0;
+                return reader;
+            }
+        }
+
+        [DllImport("xinyuetongxing.dll", CallingConvention = CallingConvention.Cdecl)]
+        private static extern int decrypt_in_memory(byte[] data, int data_len, string salt);
+
+        private static int DecryptWithDll(byte[] data, string salt)
+        {
+            return decrypt_in_memory(data, data.Length, salt);
+        }
+        
         private static void Xor(this Span<byte> data, ReadOnlySpan<byte> key)
         {
             var remaining = data.Length;
@@ -1198,7 +1248,8 @@ namespace AssetStudio
                     data[i] ^= key[i % key.Length];
                 }
             }
-        }
+        }       
+
         public static FileReader DecryptHuoyingrenzhe(FileReader reader)
         {
             Logger.Verbose($"尝试去解密火影忍者加密的文件{reader.FileName}");
