@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using System.Linq;
 using static AssetStudio.ImportHelper;
-
 namespace AssetStudio
 {
     public class FileReader : EndianBinaryReader
@@ -243,6 +242,9 @@ namespace AssetStudio
                         break;
                     case GameType.火影忍者:
                         reader = DecryptHuoyingrenzhe(reader);
+                        break;
+                    case GameType.新月同行:
+                        reader = DecryptXinyuetongxing(reader);
                         break;
                 }
             }
