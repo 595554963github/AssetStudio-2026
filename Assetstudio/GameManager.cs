@@ -56,6 +56,7 @@ namespace AssetStudio
             Games.Add(index++, new Game(GameTypeMapper.Map(GameType.无期迷途)));
             Games.Add(index++, new Game(GameTypeMapper.Map(GameType.望月)));
             Games.Add(index++, new Game(GameTypeMapper.Map(GameType.火影忍者)));
+            Games.Add(index++, new Game(GameTypeMapper.Map(GameType.新月同行)));
         }
         public static Game GetGame(GameType gameType) => GetGame((int)gameType);
         public static Game GetGame(int index)
@@ -186,7 +187,8 @@ namespace AssetStudio
         未定事件簿,
         无期迷途,
         望月,
-        火影忍者
+        火影忍者,
+        新月同行
     }
 
     public static class GameTypeMapper
@@ -239,6 +241,7 @@ namespace AssetStudio
         public static bool IsPerpetualNovelty(this GameType type) => type == GameTypeMapper.Map(GameType.物华弥新);
         public static bool IsWuqimitu(this GameType type) => type == GameTypeMapper.Map(GameType.无期迷途);
         public static bool IsHuoyingrenzhe(this GameType type) => type == GameTypeMapper.Map(GameType.火影忍者);
+        public static bool IsXinyuetongxing(this GameType type) => type == GameTypeMapper.Map(GameType.新月同行);
         public static bool IsGIGroup(this GameType type) => type switch
         {
             GameType.原神 or GameType.GI_Pack or GameType.GI_CB1 or GameType.GI_CB2 or GameType.GI_CB3 or GameType.GI_CB3Pre => true,
