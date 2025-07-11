@@ -98,9 +98,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>UnityPlayer.dll</Link>
     </Content>
-    <None Update="chonggouatatisi.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="plugins\Quickbms.exe">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
