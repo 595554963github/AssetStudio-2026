@@ -1374,5 +1374,54 @@ namespace AssetStudio
                 }
             }
         }
+
+        public static FileReader DecryptLiehunshijie(FileReader reader)
+        {
+            var data = reader.ReadBytes((int)reader.Length);
+            var fileName = reader.FileName;
+            reader.Dispose();
+
+            if (data.Length >= 4 && data[0] == 0x4F && data[1] == 0x64 && data[2] == 0x69 && data[3] == 0x6E)
+            {
+                byte[] bundleSizeBytes = new byte[8];
+                Buffer.BlockCopy(data, 9, bundleSizeBytes, 0, 8);
+                if (BitConverter.IsLittleEndian)
+                    Array.Reverse(bundleSizeBytes);
+                long bundleSizeLong = BitConverter.ToInt64(bundleSizeBytes, 0);
+
+                byte[] blockInfoHeader = new byte[12];
+                Buffer.BlockCopy(data, 17, blockInfoHeader, 0, 12);
+
+                byte[] baseHeader = Convert.FromHexString("556E69747946530000000008352E782E7800323032322E332E3534663100");
+
+                byte[] adjustedSize = BitConverter.GetBytes(bundleSizeLong + 32);
+                if (BitConverter.IsLittleEndian)
+                    Array.Reverse(adjustedSize);
+
+                byte[] zeroPadding = new byte[14];
+
+                byte[] restoredHeader;
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    ms.Write(baseHeader, 0, baseHeader.Length);
+                    ms.Write(adjustedSize, 0, adjustedSize.Length);
+                    ms.Write(blockInfoHeader, 0, blockInfoHeader.Length);
+                    ms.Write(zeroPadding, 0, zeroPadding.Length);
+                    restoredHeader = ms.ToArray();
+                }
+
+                var restoredData = new byte[restoredHeader.Length + (data.Length - 32)];
+                Buffer.BlockCopy(restoredHeader, 0, restoredData, 0, restoredHeader.Length);
+                Buffer.BlockCopy(data, 32, restoredData, restoredHeader.Length, data.Length - 32);
+
+                MemoryStream decryptedStream = new MemoryStream(restoredData);
+                return new FileReader(fileName, decryptedStream);
+            }
+            else
+            {
+                MemoryStream originalStream = new MemoryStream(data);
+                return new FileReader(fileName, originalStream);
+            }
+        }
     }
 }
