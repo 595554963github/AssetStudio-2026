@@ -246,6 +246,9 @@ namespace AssetStudio
                     case GameType.新月同行:
                         reader = DecryptXinyuetongxing(reader);
                         break;
+                    case GameType.斗罗大陆_猎魂世界:
+                        reader = DecryptLiehunshijie(reader);
+                        break;
                 }
             }
             if (reader.FileType == FileType.BundleFile && game.Type.IsBlockFile() || reader.FileType == FileType.ENCRFile || reader.FileType == FileType.Blb2File || reader.FileType == FileType.Blb3File)
