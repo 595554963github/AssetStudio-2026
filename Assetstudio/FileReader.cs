@@ -234,8 +234,8 @@ namespace AssetStudio
                     case GameType.学园少女突袭者:
                         reader = DecryptSchoolGirlStrikers(reader);
                         break;
-                    case GameType.物华弥新:
-                        reader = DecryptPerpetualNovelty(reader);
+                    case GameType.异界事务所:
+                        reader = DecryptCounterSide(reader);
                         break;
                     case GameType.无期迷途:
                         reader = DecryptWuqimitu(reader);
