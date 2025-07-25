@@ -1,4 +1,4 @@
-﻿using ZstdSharp;
+using ZstdSharp;
 using System;
 using System.Data;
 using System.IO;
@@ -449,26 +449,34 @@ namespace AssetStudio
                     }
                     blocksInfoUncompressedStream.Position = 0;
                     break;
-                case CompressionType.Lz4:
+                case CompressionType.Lz4: //LZ4
                 case CompressionType.Lz4HC:
-                    byte[] uncompressedBytes = ArrayPool<byte>.Shared.Rent((int)uncompressedSize);
-                    try
                     {
-                        Span<byte> uncompressedBytesSpan = uncompressedBytes.AsSpan(0, (int)uncompressedSize);
-
-                        int numWrite = LZ4.Instance.Decompress(blocksInfoBytesSpan, uncompressedBytesSpan);
-                        if (numWrite != (int)uncompressedSize)
+                        var uncompressedBytes = ArrayPool<byte>.Shared.Rent((int)uncompressedSize);
+                        if (Game.Type.IsPerpetualNovelty())
                         {
-                            throw new IOException($"Lz4解压出错, write {numWrite} bytes but expected {uncompressedSize} bytes");
+                            var key = blocksInfoBytesSpan[1];
+                            for (int j = 0; j < Math.Min(72, blocksInfoBytesSpan.Length); j++)
+                            {
+                                blocksInfoBytesSpan[j] ^= key;
+                            }
                         }
-
-                        blocksInfoUncompressedStream = new MemoryStream(uncompressedBytesSpan.Slice(0, numWrite).ToArray());
+                        try
+                        {
+                            var uncompressedBytesSpan = uncompressedBytes.AsSpan(0, (int)uncompressedSize);
+                            var numWrite = LZ4.Instance.Decompress(blocksInfoBytesSpan, uncompressedBytesSpan);
+                            if (numWrite != uncompressedSize)
+                            {
+                                throw new IOException($"Lz4解压出错, write {numWrite} bytes but expected {uncompressedSize} bytes");
+                            }
+                            blocksInfoUncompressedStream = new MemoryStream(uncompressedBytesSpan.ToArray());
+                        }
+                        finally
+                        {
+                            ArrayPool<byte>.Shared.Return(uncompressedBytes, true);
+                        }
+                        break;
                     }
-                    finally
-                    {
-                        ArrayPool<byte>.Shared.Return(uncompressedBytes, true);
-                    }
-                    break;
                 case CompressionType.Lz4Mr0k:
                     if (Mr0kUtils.IsMr0k(blocksInfoBytesSpan))
                     {
@@ -691,7 +699,7 @@ namespace AssetStudio
                                 var numWrite = LZ4Inv.Instance.Decompress(compressedBytesSpan, uncompressedBytesSpan);
                                 if (numWrite != uncompressedSize)
                                 {
-                                    throw new IOException($"Lz4 decompression error, write {numWrite} bytes but expected {uncompressedSize} bytes");
+                                    throw new IOException($"Lz4解压错误, write {numWrite} bytes but expected {uncompressedSize} bytes");
                                 }
                                 blocksStream.Write(uncompressedBytesSpan);
                             }
@@ -702,6 +710,7 @@ namespace AssetStudio
                             }
                             break;
                         }
+
                     case CompressionType.Lz4Lit4 or CompressionType.Lz4Lit5 when Game.Type.IsExAstris():
                         {
                             var compressedSize = (int)blockInfo.compressedSize;
@@ -766,6 +775,7 @@ namespace AssetStudio
             }
             blocksStream.Position = 0;
         }
+
 
         public int[] ParseVersion()
         {
