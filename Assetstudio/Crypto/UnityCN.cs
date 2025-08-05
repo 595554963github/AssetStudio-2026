@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text;
 using System.Security.Cryptography;
 
@@ -12,6 +12,10 @@ namespace AssetStudio
 
         public byte[] Index = new byte[0x10];
         public byte[] Sub = new byte[0x10];
+
+        public UnityCN()
+        {
+        }
 
         public UnityCN(EndianBinaryReader reader)
         {
@@ -28,10 +32,10 @@ namespace AssetStudio
             DecryptKey(signatureKey, signatureBytes);
 
             var str = Encoding.UTF8.GetString(signatureBytes);
-            Logger.Verbose($"解密的签名是{str}");
+            Logger.Verbose($"Decrypted signature is {str}");
             if (str != Signature)
             {
-                throw new Exception($"无效签名,预期为{Signature}但是反而得到{str}");
+                throw new Exception($"Invalid Signature, Expected {Signature} but found {str} instead");
             }
 
             DecryptKey(infoKey, infoBytes);
@@ -49,7 +53,7 @@ namespace AssetStudio
 
         public static bool SetKey(Entry entry)
         {
-            Logger.Verbose($"使用密钥初始化解密器{entry.Key}");
+            Logger.Verbose($"Initializing decryptor with key {entry.Key}");
             try
             {
                 using var aes = Aes.Create();
@@ -57,17 +61,17 @@ namespace AssetStudio
                 aes.Key = Convert.FromHexString(entry.Key);
 
                 Encryptor = aes.CreateEncryptor();
-                Logger.Verbose($"解密器初始化!!");
+                Logger.Verbose($"Decryptor initialized !!");
             }
             catch (Exception e)
             {
-                Logger.Error($"[UnityCN]无效的密钥!!\n{e.Message}");
+                Logger.Error($"[UnityCN] Invalid key !!\n{e.Message}");
                 return false;
             }
             return true;
         }
 
-        public void DecryptBlock(Span<byte> bytes, int size, int index)
+        public virtual void DecryptBlock(Span<byte> bytes, int size, int index)
         {
             var offset = 0;
             while (offset < size)
@@ -86,7 +90,7 @@ namespace AssetStudio
             }
         }
 
-        private int DecryptByte(Span<byte> bytes, ref int offset, ref int index)
+        protected virtual int DecryptByte(Span<byte> bytes, ref int offset, ref int index)
         {
             var b = Sub[((index >> 2) & 3) + 4] + Sub[index & 3] + Sub[((index >> 4) & 3) + 8] + Sub[((byte)index >> 6) + 12];
             bytes[offset] = (byte)((Index[bytes[offset] & 0xF] - b) & 0xF | 0x10 * (Index[bytes[offset] >> 4] - b));
@@ -96,7 +100,7 @@ namespace AssetStudio
             return b;
         }
 
-        private int Decrypt(Span<byte> bytes, int index, int remaining)
+        protected int Decrypt(Span<byte> bytes, int index, int remaining)
         {
             var offset = 0;
 
@@ -149,7 +153,7 @@ namespace AssetStudio
                 var bytes = Convert.FromHexString(Key);
                 if (bytes.Length != 0x10)
                 {
-                    Logger.Warning($"[UnityCN] {this}密钥无效,大小应为16字节，跳过...");
+                    Logger.Warning($"[UnityCN] {this} has invalid key, size should be 16 bytes, skipping...");
                     return false;
                 }
 
