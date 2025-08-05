@@ -60,6 +60,7 @@ namespace AssetStudio
             Games.Add(index++, new Game(GameTypeMapper.Map(GameType.新月同行)));
             Games.Add(index++, new Game(GameTypeMapper.Map(GameType.斗罗大陆_猎魂世界)));
             Games.Add(index++, new Game(GameTypeMapper.Map(GameType.归龙潮)));
+            Games.Add(index++, new Game(GameTypeMapper.Map(GameType.明日方舟)));
         }
         public static Game GetGame(GameType gameType) => GetGame((int)gameType);
         public static Game GetGame(int index)
