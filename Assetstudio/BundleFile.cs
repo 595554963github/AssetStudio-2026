@@ -685,6 +685,35 @@ namespace AssetStudio
                             }
                             break;
                         }
+                    case CompressionType.Lzham when Game.Type.IsArknights():
+                        {
+                            var compressedSize = (int)blockInfo.compressedSize;
+                            var uncompressedSize = (int)blockInfo.uncompressedSize;
+
+                            var compressedBytes = ArrayPool<byte>.Shared.Rent(compressedSize);
+                            var uncompressedBytes = ArrayPool<byte>.Shared.Rent(uncompressedSize);
+
+                            var compressedBytesSpan = compressedBytes.AsSpan(0, compressedSize);
+                            var uncompressedBytesSpan = uncompressedBytes.AsSpan(0, uncompressedSize);
+
+                            try
+                            {
+                                reader.Read(compressedBytesSpan);
+
+                                var numWrite = LZ4InvArknights.Instance.Decompress(compressedBytesSpan, uncompressedBytesSpan);
+                                if (numWrite != uncompressedSize)
+                                {
+                                    throw new IOException($"Lz4解压错误, write {numWrite} bytes but expected {uncompressedSize} bytes");
+                                }
+                                blocksStream.Write(uncompressedBytesSpan);
+                            }
+                            finally
+                            {
+                                ArrayPool<byte>.Shared.Return(compressedBytes, true);
+                                ArrayPool<byte>.Shared.Return(uncompressedBytes, true);
+                            }
+                            break;
+                        }
                     case CompressionType.Lz4Inv when (Game.Type.IsArknightsEndfield() || Game.Type.IsWangYue()):
                         {
                             var compressedSize = (int)blockInfo.compressedSize;
@@ -718,6 +747,9 @@ namespace AssetStudio
                             }
                             break;
                         }
+
+
+
                     case CompressionType.Lz4Lit4 or CompressionType.Lz4Lit5 when Game.Type.IsExAstris():
                         {
                             var compressedSize = (int)blockInfo.compressedSize;
