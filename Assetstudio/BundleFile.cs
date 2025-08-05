@@ -20,7 +20,8 @@ namespace AssetStudio
         BlocksInfoAtTheEnd = 0x80,
         OldWebPluginCompatibility = 0x100,
         BlockInfoNeedPaddingAtStart = 0x200,
-        UnityCNEncryption = 0x400
+        UnityCNEncryption = 0x400,
+        UnityCNEncryptionNew = 0x1000
     }
 
     [Flags]
@@ -382,31 +383,38 @@ namespace AssetStudio
 
         private void ReadUnityCN(FileReader reader)
         {
-            Logger.Verbose($"尝试解密使用UnityCN加密的文件{reader.FileName}");
+            Logger.Verbose($"尝试使用UnityCN解密文件{reader.FileName}");
             ArchiveFlags mask;
 
-            var version = ParseVersion();
-            //Flag changed it in these versions
-            if (version[0] < 2020 || //2020 and earlier
-                (version[0] == 2020 && version[1] == 3 && version[2] <= 34) || //2020.3.34 and earlier
-                (version[0] == 2021 && version[1] == 3 && version[2] <= 2) || //2021.3.2 and earlier
-                (version[0] == 2022 && version[1] == 3 && version[2] <= 1)) //2022.3.1 and earlier
+            var versionStr = m_Header.unityRevision;
+
+            if (versionStr.StartsWith("2020") ||
+                (versionStr.StartsWith("2020.3") && versionStr.CompareTo("2020.3.34") <= 0) || // <= 2020.3.34
+                (versionStr.StartsWith("2021.3") && versionStr.CompareTo("2021.3.2") <= 0) || // <= 2021.3.2
+                (versionStr.StartsWith("2022.3") && versionStr.CompareTo("2022.3.1") <= 0)) // <= 2022.3.1
             {
                 mask = ArchiveFlags.BlockInfoNeedPaddingAtStart;
                 HasBlockInfoNeedPaddingAtStart = false;
             }
             else
             {
-                mask = ArchiveFlags.UnityCNEncryption;
+                mask = ArchiveFlags.UnityCNEncryption | ArchiveFlags.UnityCNEncryptionNew;
                 HasBlockInfoNeedPaddingAtStart = true;
             }
 
-            Logger.Verbose($"掩码设置为{mask}");
+            Logger.Verbose($"Mask set to {mask}");
 
             if ((m_Header.flags & mask) != 0)
             {
-                Logger.Verbose($"加密标志存在,文件已加密，试图解密");
-                UnityCN = new UnityCN(reader);
+                Logger.Verbose($"加密标志存在，文件已加密，正在尝试解密");
+                if (Game.Type.IsGuiLongChao())
+                {
+                    UnityCN = new UnityCNGuiLongChao(reader);
+                }
+                else
+                {
+                    UnityCN = new UnityCN(reader);
+                }
             }
         }
 
@@ -710,7 +718,6 @@ namespace AssetStudio
                             }
                             break;
                         }
-
                     case CompressionType.Lz4Lit4 or CompressionType.Lz4Lit5 when Game.Type.IsExAstris():
                         {
                             var compressedSize = (int)blockInfo.compressedSize;
