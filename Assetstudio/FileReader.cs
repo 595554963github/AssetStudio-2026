@@ -234,20 +234,20 @@ namespace AssetStudio
                     case GameType.学园少女突袭者:
                         reader = DecryptSchoolGirlStrikers(reader);
                         break;
-                    case GameType.异界事务所:
+                    case GameType.未来战:
                         reader = DecryptCounterSide(reader);
                         break;
                     case GameType.无期迷途:
-                        reader = DecryptWuqimitu(reader);
+                        reader = DecryptWuQiMiTu(reader);
                         break;
                     case GameType.火影忍者:
-                        reader = DecryptHuoyingrenzhe(reader);
+                        reader = DecryptHuoYingRenZhe(reader);
                         break;
                     case GameType.新月同行:
-                        reader = DecryptXinyuetongxing(reader);
+                        reader = DecryptXinYueTongXing(reader);
                         break;
                     case GameType.斗罗大陆_猎魂世界:
-                        reader = DecryptLiehunshijie(reader);
+                        reader = DecryptLieHunShiJie(reader);
                         break;
                 }
             }
