@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
@@ -81,7 +81,7 @@ namespace AssetStudio
                     var json = await DownloadString(url, TimeSpan.FromMinutes(5));
                     if (string.IsNullOrEmpty(json))
                     {
-                        Logger.Warning("无法加载AI !!");
+                        Logger.Warning("无法加载资源索引!!");
                         return "";
                     }
                     if (!await StoreCommit(version, versionIndex.MappedPath))
