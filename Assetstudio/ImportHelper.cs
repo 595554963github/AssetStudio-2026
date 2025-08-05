@@ -1130,7 +1130,7 @@ namespace AssetStudio
 
         public static FileReader DecryptCounterSide(FileReader reader)
         {
-            Logger.Verbose($"尝试去解密异界事务所{reader.FileName}");
+            Logger.Verbose($"尝试去解密未来战{reader.FileName}");
 
             var data = reader.ReadBytes((int)reader.Remaining);
 
@@ -1168,7 +1168,7 @@ namespace AssetStudio
                 maskPos = (maskPos + 1) % 4;
             }
 
-            Logger.Verbose("解密异界事务所成功!!");
+            Logger.Verbose("解密未来战成功!!");
 
             MemoryStream ms = new();
             ms.Write(data);
@@ -1176,7 +1176,7 @@ namespace AssetStudio
             return new FileReader(reader.FullPath, ms);
         }
 
-        public static FileReader DecryptWuqimitu(FileReader reader)
+        public static FileReader DecryptWuQiMiTu(FileReader reader)
         {
             Logger.Verbose($"尝试去解密{reader.FileName}加密的无期迷途");
 
@@ -1203,7 +1203,7 @@ namespace AssetStudio
             return new FileReader(reader.FullPath, ms);
         }
 
-        public static FileReader DecryptXinyuetongxing(FileReader reader)
+        public static FileReader DecryptXinYueTongXing(FileReader reader)
         {
             Logger.Verbose($"尝试解密新月同行加密的文件 {reader.FileName}");
 
@@ -1283,7 +1283,7 @@ namespace AssetStudio
             }
         }       
 
-        public static FileReader DecryptHuoyingrenzhe(FileReader reader)
+        public static FileReader DecryptHuoYingRenZhe(FileReader reader)
         {
             Logger.Verbose($"尝试去解密火影忍者加密的文件{reader.FileName}");
 
@@ -1408,7 +1408,7 @@ namespace AssetStudio
             }
         }
 
-        public static FileReader DecryptLiehunshijie(FileReader reader)
+        public static FileReader DecryptLieHunShiJie(FileReader reader)
         {
             var data = reader.ReadBytes((int)reader.Length);
             var fileName = reader.FileName;
