@@ -201,7 +201,7 @@ namespace AssetStudio
                 case "ENCR":
                     header.version = 6; // is 7 but does not have uncompressedDataHash
                     header.unityVersion = "5.x.x";
-                    header.unityRevision = "2019.4.32f1";
+                    header.unityRevision = "2019.4.34f1";
                     HasUncompressedDataHash = false;
                     break;
                 default:
