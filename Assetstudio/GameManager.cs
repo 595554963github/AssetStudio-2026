@@ -43,7 +43,7 @@ namespace AssetStudio
             Games.Add(index++, new Game(GameTypeMapper.Map(GameType.机甲爱丽丝)));
             Games.Add(index++, new Game(GameTypeMapper.Map(GameType.世界计划多彩舞台)));
             Games.Add(index++, new Game(GameTypeMapper.Map(GameType.jump群星集结)));
-            Games.Add(index++, new Game(GameTypeMapper.Map(GameType.少女前线)));
+            Games.Add(index++, new Game(GameTypeMapper.Map(GameType.少女前线2_追放)));
             Games.Add(index++, new Game(GameTypeMapper.Map(GameType.重返未来1999)));
             Games.Add(index++, new Game(GameTypeMapper.Map(GameType.明日方舟_终末地)));
             Games.Add(index++, new Game(GameTypeMapper.Map(GameType.咒术回战幻影夜行)));
@@ -175,7 +175,7 @@ namespace AssetStudio
         机甲爱丽丝,
         世界计划多彩舞台,
         jump群星集结,
-        少女前线,
+        少女前线2_追放,
         重返未来1999,
         明日方舟_终末地,
         咒术回战幻影夜行,
