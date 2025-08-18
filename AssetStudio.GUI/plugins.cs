@@ -122,6 +122,17 @@ namespace AssetStudio.GUI
             return menuItem;
         }
 
+        public static ToolStripMenuItem CreateWinPCKMenuItem()
+        {
+            var menuItem = new ToolStripMenuItem();
+            menuItem.Name = "toolStripMenuItem31";
+            menuItem.Size = new System.Drawing.Size(180, 22);
+            menuItem.Text = "完美世界pck解包工具";
+            menuItem.Visible = true;
+            menuItem.Click += WinPCKToolStripMenuItem_Click;
+            return menuItem;
+        }
+
         private static void 万能二进制提取器ToolStripMenuItem_Click(object sender, System.EventArgs e)
         {
             var formFromExtractor = new FileExtractor();
@@ -286,6 +297,25 @@ namespace AssetStudio.GUI
             }
         }
 
+        private static void WinPCKToolStripMenuItem_Click(object sender, System.EventArgs e)
+        {
+            try
+            {
+                string relativePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "plugins", "WinPCK.exe");
+                if (File.Exists(relativePath))
+                {
+                    Process.Start(relativePath);
+                }
+                else
+                {
+                    MessageBox.Show("未找到WinPCK.exe文件，请检查路径。", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"启动WinPCK.exe时出错: {ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
         public static void AddMenuItemsToPluginMenu(ToolStripMenuItem pluginMenu)
         {
             var extractorMenuItem = CreateDefaultExtractorMenuItem();
@@ -298,6 +328,7 @@ namespace AssetStudio.GUI
             var pakExplorerMenuItem = CreatePakExplorerMenuItem();
             var pSoundMenuItem = CreatePSoundMenuItem();
             var winAsarMenuItem = CreateWinAsarMenuItem();
+            var winPCKMenuItem = CreateWinPCKMenuItem();
 
             pluginMenu.DropDownItems.Add(extractorMenuItem);
             pluginMenu.DropDownItems.Add(removerMenuItem);
@@ -309,6 +340,7 @@ namespace AssetStudio.GUI
             pluginMenu.DropDownItems.Add(pakExplorerMenuItem);
             pluginMenu.DropDownItems.Add(pSoundMenuItem);
             pluginMenu.DropDownItems.Add(winAsarMenuItem);
+            pluginMenu.DropDownItems.Add(winPCKMenuItem);
         }
 
         public static void AddMenuItemsToMainForm(MainForm mainForm)
