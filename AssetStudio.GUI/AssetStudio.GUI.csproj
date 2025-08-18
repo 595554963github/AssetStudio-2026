@@ -118,6 +118,9 @@
 		<None Update="plugins\WinAsar汉化版.exe">
 		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
+		<None Update="plugins\WinPCK.exe">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
 		<None Update="plugins\xinyuetongxing.dll">
 			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
 		</None>
