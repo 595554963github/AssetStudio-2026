@@ -63,6 +63,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Costura.Fody" Version="6.0.0">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageReference Include="OpenTK" Version="4.8.0" />
 		<Reference Include="OpenTK.WinForms">
