@@ -552,7 +552,7 @@ namespace AssetStudio.GUI
                         {
                             FMODpanel.Visible = !FMODpanel.Visible;
 
-                            if (sound.hasHandle() && channel.hasHandle())
+                            if (sound != null && channel != null)
                             {
                                 var result = channel.isPlaying(out var playing);
                                 if (result == FMOD.RESULT.OK && playing)
@@ -2622,20 +2622,20 @@ namespace AssetStudio.GUI
             timer.Stop();
             FMODprogressBar.Value = 0;
             FMODtimerLabel.Text = "0:00.0 / 0:00.0";
-            FMODstatusLabel.Text = "结束了";
+            FMODstatusLabel.Text = "已停止";
             FMODinfoLabel.Text = "";
 
-            if (!sound.Equals(default(Sound)) && sound.hasHandle())
+            if (sound != null && sound.isValid())
             {
                 var result = sound.release();
                 ERRCHECK(result);
-                sound = default; 
+                sound = null;
             }
         }
 
         private void FMODplayButton_Click(object sender, EventArgs e)
         {
-            if (sound.hasHandle() && channel.hasHandle())
+            if (sound != null && channel != null)
             {
                 timer.Start();
                 var result = channel.isPlaying(out var playing);
@@ -2649,16 +2649,16 @@ namespace AssetStudio.GUI
                     result = channel.stop();
                     if (ERRCHECK(result)) { return; }
 
-                    result = system.playSound(sound, default(FMOD.ChannelGroup), false, out channel);
+                    result = system.playSound(sound, null, false, out channel);
                     if (ERRCHECK(result)) { return; }
 
                     FMODpauseButton.Text = "暂停";
                 }
                 else
                 {
-                    result = system.playSound(sound, default(FMOD.ChannelGroup), false, out channel);
+                    result = system.playSound(sound, null, false, out channel);
                     if (ERRCHECK(result)) { return; }
-                    FMODstatusLabel.Text = "正在播放";
+                    FMODstatusLabel.Text = "播放";
 
                     if (FMODprogressBar.Value > 0)
                     {
@@ -2677,7 +2677,7 @@ namespace AssetStudio.GUI
 
         private void FMODpauseButton_Click(object sender, EventArgs e)
         {
-            if (sound.hasHandle() && channel.hasHandle())
+            if (sound != null && channel != null)
             {
                 var result = channel.isPlaying(out var playing);
                 if ((result != FMOD.RESULT.OK) && (result != FMOD.RESULT.ERR_INVALID_HANDLE))
@@ -2694,14 +2694,14 @@ namespace AssetStudio.GUI
 
                     if (paused)
                     {
-                        FMODstatusLabel.Text = "正在播放";
+                        FMODstatusLabel.Text = "播放";
                         FMODpauseButton.Text = "暂停";
                         timer.Start();
                     }
                     else
                     {
-                        FMODstatusLabel.Text = "已暂停";
-                        FMODpauseButton.Text = "继续";
+                        FMODstatusLabel.Text = "暂停";
+                        FMODpauseButton.Text = "恢复";
                         timer.Stop();
                     }
                 }
@@ -2710,7 +2710,7 @@ namespace AssetStudio.GUI
 
         private void FMODstopButton_Click(object sender, EventArgs e)
         {
-            if (channel.hasHandle())
+            if (channel != null)
             {
                 var result = channel.isPlaying(out var playing);
                 if ((result != FMOD.RESULT.OK) && (result != FMOD.RESULT.ERR_INVALID_HANDLE))
@@ -2739,13 +2739,13 @@ namespace AssetStudio.GUI
 
             loopMode = FMODloopButton.Checked ? FMOD.MODE.LOOP_NORMAL : FMOD.MODE.LOOP_OFF;
 
-            if (sound.hasHandle())
+            if (sound != null)
             {
                 result = sound.setMode(loopMode);
                 if (ERRCHECK(result)) { return; }
             }
 
-            if (channel.hasHandle())
+            if (channel != null)
             {
                 result = channel.isPlaying(out var playing);
                 if ((result != FMOD.RESULT.OK) && (result != FMOD.RESULT.ERR_INVALID_HANDLE))
@@ -2777,7 +2777,7 @@ namespace AssetStudio.GUI
 
         private void FMODprogressBar_Scroll(object sender, EventArgs e)
         {
-            if (channel.hasHandle())
+            if (channel != null)
             {
                 uint newms = FMODlenms / 1000 * (uint)FMODprogressBar.Value;
                 FMODtimerLabel.Text = $"{newms / 1000 / 60}:{newms / 1000 % 60}.{newms / 10 % 100}/{FMODlenms / 1000 / 60}:{FMODlenms / 1000 % 60}.{FMODlenms / 10 % 100}";
@@ -2791,7 +2791,7 @@ namespace AssetStudio.GUI
 
         private void FMODprogressBar_MouseUp(object sender, MouseEventArgs e)
         {
-            if (channel.hasHandle())
+            if (channel != null)
             {
                 uint newms = FMODlenms / 1000 * (uint)FMODprogressBar.Value;
 
@@ -2818,7 +2818,7 @@ namespace AssetStudio.GUI
             bool playing = false;
             bool paused = false;
 
-            if (channel.hasHandle())
+            if (channel != null)
             {
                 var result = channel.getPosition(out ms, FMOD.TIMEUNIT.MS);
                 if ((result != FMOD.RESULT.OK) && (result != FMOD.RESULT.ERR_INVALID_HANDLE))
@@ -2840,17 +2840,10 @@ namespace AssetStudio.GUI
             }
 
             FMODtimerLabel.Text = $"{ms / 1000 / 60}:{ms / 1000 % 60}.{ms / 10 % 100} / {FMODlenms / 1000 / 60}:{FMODlenms / 1000 % 60}.{FMODlenms / 10 % 100}";
+            FMODprogressBar.Value = (int)(ms * 1000 / FMODlenms);
+            FMODstatusLabel.Text = paused ? "已停止" : playing ? "播放" : "已停止";
 
-            if (FMODlenms > 0)
-            {
-                int progressValue = (int)((long)ms * FMODprogressBar.Maximum / FMODlenms);
-                progressValue = Math.Max(FMODprogressBar.Minimum, Math.Min(FMODprogressBar.Maximum, progressValue));
-                FMODprogressBar.Value = progressValue;
-            }
-
-            FMODstatusLabel.Text = paused ? "已暂停" : playing ? "正在播放" : "已停止";
-
-            if (system.hasHandle() && channel.hasHandle())
+            if (system != null && channel != null)
             {
                 system.update();
             }
