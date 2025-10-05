@@ -26,6 +26,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\AssetStudio.PInvoke\AssetStudio.PInvoke.csproj" />
 		<ProjectReference Include="..\AssetStudio.Utility\AssetStudio.Utility.csproj" />
 		<ProjectReference Include="..\AssetStudio\AssetStudio.csproj" />
 	</ItemGroup>
@@ -72,18 +73,6 @@
 		<Reference Include="OpenTK.WinForms">
 			<HintPath>Libraries\OpenTK.WinForms.dll</HintPath>
 		</Reference>
-		<Reference Include="quickbmsbatch">
-			<HintPath>plugins\quickbmsbatch.dll</HintPath>
-		</Reference>
-		<Reference Include="Super-toolbox">
-			<HintPath>plugins\Super-toolbox.dll</HintPath>
-		</Reference>
-		<Reference Include="万能二进制提取器">
-			<HintPath>plugins\万能二进制提取器.dll</HintPath>
-		</Reference>
-		<Reference Include="万能字节移除器">
-			<HintPath>plugins\万能字节移除器.dll</HintPath>
-		</Reference>
 	</ItemGroup>
 
 	<ItemGroup>
@@ -95,36 +84,6 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<Link>UnityPlayer.dll</Link>
 		</Content>
-		<None Update="plugins\pak_explorer.exe">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="plugins\PSound.exe">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="plugins\Quickbms.exe">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="plugins\quickbms_4gb_files.exe">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="plugins\radvideo64.exe">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="plugins\RioX汉化版.exe">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="plugins\Sofdec2Viewer汉化版.exe">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="plugins\USM视频查看工具汉化版.exe">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="plugins\WinAsar汉化版.exe">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="plugins\WinPCK.exe">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
 		<None Update="plugins\xinyuetongxing.dll">
 			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
 		</None>
