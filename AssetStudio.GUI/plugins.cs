@@ -62,8 +62,8 @@ namespace AssetStudio.GUI
             {
                 Name = "SuperToolbox",
                 DisplayName = "超级工具箱",
-                DownloadUrl = "https://github.com/595554963github/AssetStudio-Neptune/releases/download/plugins/SuperToolbox.dll",
-                FileName = "SuperToolbox.dll",
+                DownloadUrl = "https://github.com/595554963github/AssetStudio-Neptune/releases/download/plugins/Super-toolbox.dll",
+                FileName = "Super-toolbox.dll",
                 IsDownloaded = false,
                 IsExternalTool = false,
                 IsBuiltInDll = true
@@ -92,7 +92,7 @@ namespace AssetStudio.GUI
             {
                 Name = "QuickBMS",
                 DisplayName = "quickbms汉化版",
-                DownloadUrl = "https://github.com/595554963github/AssetStudio-Neptune/releases/download/plugins/QuickBMS.exe",
+                DownloadUrl = "https://github.com/595554963github/AssetStudio-Neptune/releases/download/plugins/quickbms.exe",
                 FileName = "quickbms.exe",
                 IsDownloaded = false,
                 IsExternalTool = true,
@@ -256,7 +256,101 @@ namespace AssetStudio.GUI
 
             return menuItem;
         }
+        public class DownloadSpeedCalculator
+        {
+            private DateTime startTime;
+            private long totalBytes;
+            private DateTime lastUpdateTime;
+            private long lastBytes;
+            private double smoothedSpeed = 0;
 
+            public void Start()
+            {
+                startTime = DateTime.Now;
+                lastUpdateTime = startTime;
+                totalBytes = 0;
+                lastBytes = 0;
+                smoothedSpeed = 0;
+            }
+
+            public void AddBytes(long bytes)
+            {
+                totalBytes += bytes;
+            }
+
+            public void Stop()
+            {
+            }
+
+            public double ElapsedTime => (DateTime.Now - startTime).TotalSeconds;
+
+            public (double Speed, string Unit, string ETA) GetSpeedInfo(long downloadedBytes, long totalBytes)
+            {
+                var currentTime = DateTime.Now;
+                var timeDiff = (currentTime - lastUpdateTime).TotalSeconds;
+
+                if (timeDiff < 0.1)
+                {
+                    return (smoothedSpeed, smoothedSpeed > 1024 ? "MB/s" : "KB/s", "");
+                }
+
+                double currentSpeed = (downloadedBytes - lastBytes) / timeDiff / 1024;
+
+                if (smoothedSpeed == 0)
+                {
+                    smoothedSpeed = currentSpeed;
+                }
+                else
+                {
+                    smoothedSpeed = 0.7 * smoothedSpeed + 0.3 * currentSpeed;
+                }
+
+                lastUpdateTime = currentTime;
+                lastBytes = downloadedBytes;
+
+                double speed;
+                string unit;
+
+                if (smoothedSpeed > 1024)
+                {
+                    speed = smoothedSpeed / 1024;
+                    unit = "MB/s";
+                }
+                else
+                {
+                    speed = smoothedSpeed;
+                    unit = "KB/s";
+                }
+
+                string eta = "";
+                if (totalBytes > 0)
+                {
+                    long remainingBytes = totalBytes - downloadedBytes;
+                    if (remainingBytes > 0 && smoothedSpeed > 0)
+                    {
+                        double etaSeconds = remainingBytes / (smoothedSpeed * 1024);
+                        if (etaSeconds < 60)
+                        {
+                            eta = $"{etaSeconds:F0}秒";
+                        }
+                        else if (etaSeconds < 3600)
+                        {
+                            eta = $"{etaSeconds / 60:F0}分";
+                        }
+                        else
+                        {
+                            eta = $"{etaSeconds / 3600:F1}小时";
+                        }
+                    }
+                    else
+                    {
+                        eta = "完成";
+                    }
+                }
+
+                return (speed, unit, eta);
+            }
+        }
         private static void DownloadPlugin(PluginInfo plugin, ToolStripMenuItem menuItem)
         {
             if (plugin.IsDownloaded)
@@ -345,9 +439,24 @@ namespace AssetStudio.GUI
                 Type mainFormType = formTypes.FirstOrDefault(t =>
                     t.Name.Contains("Main", StringComparison.OrdinalIgnoreCase)) ?? formTypes[0];
 
+                Form existingInstance = Application.OpenForms.Cast<Form>()
+                    .FirstOrDefault(form => form.GetType() == mainFormType);
+
+                if (existingInstance != null)
+                {
+                    if (existingInstance.WindowState == FormWindowState.Minimized)
+                    {
+                        existingInstance.WindowState = FormWindowState.Normal;
+                    }
+                    existingInstance.BringToFront();
+                    existingInstance.Focus();
+                    return;
+                }
+
                 Form mainForm = Activator.CreateInstance(mainFormType) as Form;
                 if (mainForm != null)
                 {
+                    mainForm.StartPosition = FormStartPosition.CenterScreen;
                     mainForm.Show();
                 }
                 else
@@ -442,7 +551,10 @@ namespace AssetStudio.GUI
             private long totalBytes = 0;
             private long totalDownloadedBytes = 0;
             private readonly object lockObject = new object();
-
+            private Label speedLabel;
+            private Label etaLabel;
+            private DownloadSpeedCalculator downloadSpeedCalculator;
+            private long currentTotalBytes = 0;
             public DownloadProgressForm(Plugins.PluginInfo plugin)
             {
                 this.plugin = plugin;
@@ -453,7 +565,7 @@ namespace AssetStudio.GUI
 
             private void InitializeComponent()
             {
-                this.Size = new Size(400, 150);
+                this.Size = new Size(450, 200);
                 this.Text = $"下载{plugin.DisplayName}";
                 this.StartPosition = FormStartPosition.CenterScreen;
                 this.FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -471,15 +583,28 @@ namespace AssetStudio.GUI
                 progressBar = new ProgressBar
                 {
                     Location = new Point(20, 50),
-                    Size = new Size(360, 23),
+                    Size = new Size(410, 23),
                     Style = ProgressBarStyle.Continuous
+                };
+                speedLabel = new Label
+                {
+                    Text = "速度: --",
+                    Location = new Point(20, 80),
+                    Size = new Size(200, 15)
+                };
+
+                etaLabel = new Label
+                {
+                    Text = "剩余时间: --",
+                    Location = new Point(20, 100),
+                    Size = new Size(200, 15)
                 };
 
                 var cancelButton = new Button
                 {
                     Text = "取消",
-                    Location = new Point(305, 80),
-                    Size = new Size(75, 23)
+                    Location = new Point(335, 130),
+                    Size = new Size(95, 25)
                 };
                 cancelButton.Click += (s, e) =>
                 {
@@ -490,7 +615,11 @@ namespace AssetStudio.GUI
 
                 this.Controls.Add(statusLabel);
                 this.Controls.Add(progressBar);
+                this.Controls.Add(speedLabel);
+                this.Controls.Add(etaLabel);
                 this.Controls.Add(cancelButton);
+
+                downloadSpeedCalculator = new DownloadSpeedCalculator();
             }
 
             private HttpClient CreateOptimizedHttpClient()
@@ -521,6 +650,7 @@ namespace AssetStudio.GUI
             private async Task StartDownloadAsync()
             {
                 IsDownloading = true;
+                downloadSpeedCalculator.Start();
                 try
                 {
                     if (!Directory.Exists(Plugins.pluginsDirectory))
@@ -562,6 +692,7 @@ namespace AssetStudio.GUI
                 }
                 finally
                 {
+                    downloadSpeedCalculator.Stop();
                     IsDownloading = false;
                 }
             }
@@ -597,7 +728,7 @@ namespace AssetStudio.GUI
                 }
 
                 totalDownloadedBytes = 0;
-
+                currentTotalBytes = fileSize;
                 for (int i = 0; i < threadCount; i++)
                 {
                     var startByte = i * chunkSize;
@@ -653,7 +784,7 @@ namespace AssetStudio.GUI
                     {
                         totalBytes = response.Content.Headers.ContentLength ?? 0;
                     }
-
+                    currentTotalBytes = totalBytes;
                     using (var contentStream = await response.Content.ReadAsStreamAsync())
                     using (var fileStream = new FileStream(savePath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true))
                     {
@@ -682,31 +813,64 @@ namespace AssetStudio.GUI
             {
                 if (totalBytes <= 0) return;
 
-                var progress = (totalDownloadedBytes * 100) / totalBytes;
+                var progress = (int)((double)totalDownloadedBytes / totalBytes * 100);
+                var speedInfo = downloadSpeedCalculator.GetSpeedInfo(totalDownloadedBytes, totalBytes);
 
                 if (progressBar.InvokeRequired)
                 {
-                    progressBar.Invoke(new Action(() => progressBar.Value = (int)progress));
-                    statusLabel.Invoke(new Action(() => statusLabel.Text = $"下载中:{progress}%"));
+                    progressBar.Invoke(new Action(() => {
+                        progressBar.Value = Math.Min(progress, 100);
+                        statusLabel.Text = $"下载中: {progress}% ({FormatFileSize(totalDownloadedBytes)} / {FormatFileSize(totalBytes)})";
+                        speedLabel.Text = $"速度: {speedInfo.Speed:F1} {speedInfo.Unit}";
+                        etaLabel.Text = $"剩余时间: {speedInfo.ETA}";
+                    }));
                 }
                 else
                 {
-                    progressBar.Value = (int)progress;
-                    statusLabel.Text = $"下载中:{progress}%";
+                    progressBar.Value = Math.Min(progress, 100);
+                    statusLabel.Text = $"下载中: {progress}% ({FormatFileSize(totalDownloadedBytes)} / {FormatFileSize(totalBytes)})";
+                    speedLabel.Text = $"速度: {speedInfo.Speed:F1} {speedInfo.Unit}";
+                    etaLabel.Text = $"剩余时间: {speedInfo.ETA}";
                 }
             }
-
+            private string FormatFileSize(long bytes)
+            {
+                if (bytes >= 1024 * 1024 * 1024) // GB
+                {
+                    return $"{bytes / (1024.0 * 1024 * 1024):0.00} GB";
+                }
+                else if (bytes >= 1024 * 1024) // MB
+                {
+                    return $"{bytes / (1024.0 * 1024):0.00} MB";
+                }
+                else if (bytes >= 1024) // KB
+                {
+                    return $"{bytes / 1024.0:0.00} KB";
+                }
+                else // B
+                {
+                    return $"{bytes} B";
+                }
+            }
             private void UpdateProgressUI(int percentage, long bytesRead)
             {
+                var speedInfo = downloadSpeedCalculator.GetSpeedInfo(bytesRead, totalBytes);
+
                 if (progressBar.InvokeRequired)
                 {
-                    progressBar.Invoke(new Action(() => progressBar.Value = percentage));
-                    statusLabel.Invoke(new Action(() => statusLabel.Text = $"下载中:{bytesRead / 1024}KB"));
+                    progressBar.Invoke(new Action(() => {
+                        progressBar.Value = percentage;
+                        statusLabel.Text = $"下载中: {percentage}% ({FormatFileSize(bytesRead)} / {FormatFileSize(totalBytes)})";
+                        speedLabel.Text = $"速度: {speedInfo.Speed:F1} {speedInfo.Unit}";
+                        etaLabel.Text = $"剩余时间: {speedInfo.ETA}";
+                    }));
                 }
                 else
                 {
                     progressBar.Value = percentage;
-                    statusLabel.Text = $"下载中:{bytesRead / 1024}KB";
+                    statusLabel.Text = $"下载中: {percentage}% ({FormatFileSize(bytesRead)} / {FormatFileSize(totalBytes)})";
+                    speedLabel.Text = $"速度: {speedInfo.Speed:F1} {speedInfo.Unit}";
+                    etaLabel.Text = $"剩余时间: {speedInfo.ETA}";
                 }
             }
 
