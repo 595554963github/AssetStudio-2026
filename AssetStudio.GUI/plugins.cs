@@ -25,6 +25,9 @@ namespace AssetStudio.GUI
             public bool IsDownloaded { get; set; }
             public bool IsExternalTool { get; set; }
             public bool IsBuiltInDll { get; set; }
+            public bool IsZipFile { get; set; }
+            public string ExeFileName { get; set; }
+            public string ExtractFolder { get; set; }
         }
 
         public static List<PluginInfo> plugins = new List<PluginInfo>
@@ -208,6 +211,39 @@ namespace AssetStudio.GUI
                 IsDownloaded = false,
                 IsExternalTool = true,
                 IsBuiltInDll = false
+            },
+            new PluginInfo
+            {
+                Name = "cmake-gui",
+                DisplayName = "cmakegui汉化版",
+                DownloadUrl = "https://gitee.com/valkylia-goddess/AssetStudio-Neptune/releases/download/down/cmake-gui.exe",
+                FileName = "cmake-gui.exe",
+                IsDownloaded = false,
+                IsExternalTool = true,
+                IsBuiltInDll = false
+            },
+            new PluginInfo
+            {
+                Name = "QuickWaveBank",
+                DisplayName = "xwb打包解包工具",
+                DownloadUrl = "https://gitee.com/valkylia-goddess/AssetStudio-Neptune/releases/download/down/QuickWaveBank.exe",
+                FileName = "QuickWaveBank.exe",
+                IsDownloaded = false,
+                IsExternalTool = true,
+                IsBuiltInDll = false
+            },
+            new PluginInfo
+            {
+                Name = "FSBank",
+                DisplayName = "FSB打包工具",
+                DownloadUrl = "https://gitee.com/valkylia-goddess/AssetStudio-Neptune/releases/download/down/fsbank.zip",
+                FileName = "fsbank.zip",
+                 IsDownloaded = false,
+                 IsExternalTool = true,
+                 IsBuiltInDll = false,
+                 IsZipFile = true,
+                 ExeFileName = "fsbank.exe",
+                 ExtractFolder = "fsbank"
             }
         };
 
@@ -222,7 +258,15 @@ namespace AssetStudio.GUI
 
             foreach (var plugin in plugins)
             {
-                string filePath = Path.Combine(pluginsDirectory, plugin.FileName);
+                string filePath;
+                if (plugin.IsZipFile && !string.IsNullOrEmpty(plugin.ExtractFolder))
+                {
+                    filePath = Path.Combine(pluginsDirectory, plugin.ExtractFolder, plugin.ExeFileName);
+                }
+                else
+                {
+                    filePath = Path.Combine(pluginsDirectory, plugin.FileName);
+                }
                 plugin.IsDownloaded = File.Exists(filePath);
             }
         }
@@ -486,6 +530,25 @@ namespace AssetStudio.GUI
                     string filePath = Path.Combine(pluginsDirectory, plugin.FileName);
                     if (File.Exists(filePath))
                     {
+                        if (plugin.IsZipFile)
+                        {
+                            try
+                            {
+                                string extractPath = Path.Combine(pluginsDirectory, plugin.ExtractFolder);
+                                if (!Directory.Exists(extractPath))
+                                {
+                                    Directory.CreateDirectory(extractPath);
+                                }
+                                System.IO.Compression.ZipFile.ExtractToDirectory(filePath, extractPath, true);
+
+                                File.Delete(filePath);
+                            }
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show($"解压失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                return;
+                            }
+                        }
                         plugin.IsDownloaded = true;
                         UpdateMainMenuItemText(plugin, menuItem);
                         if (menuItem.DropDownItems.Count >= 3)
@@ -524,7 +587,15 @@ namespace AssetStudio.GUI
 
             try
             {
-                string filePath = Path.Combine(pluginsDirectory, plugin.FileName);
+                string filePath;
+                if (plugin.IsZipFile)
+                {
+                    filePath = Path.Combine(pluginsDirectory, plugin.ExtractFolder, plugin.ExeFileName);
+                }
+                else
+                {
+                    filePath = Path.Combine(pluginsDirectory, plugin.FileName);
+                }
 
                 if (!File.Exists(filePath))
                 {
@@ -533,7 +604,7 @@ namespace AssetStudio.GUI
                     return;
                 }
 
-                if (plugin.IsExternalTool)
+                if (plugin.IsExternalTool || plugin.IsZipFile)
                 {
                     Process.Start(filePath);
                 }
@@ -552,7 +623,6 @@ namespace AssetStudio.GUI
         {
             try
             {
-                // 设置解析程序集失败时的处理
                 AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
 
                 Assembly assembly = Assembly.LoadFrom(filePath);
@@ -596,7 +666,6 @@ namespace AssetStudio.GUI
             }
             catch (ReflectionTypeLoadException ex)
             {
-                // 处理类型加载异常，尝试忽略缺失的依赖
                 var loaderExceptions = ex.LoaderExceptions;
                 StringBuilder sb = new StringBuilder();
                 sb.AppendLine($"加载插件时遇到依赖问题，尝试继续运行:");
@@ -606,12 +675,10 @@ namespace AssetStudio.GUI
                     if (loaderException is FileNotFoundException fileNotFound)
                     {
                         sb.AppendLine($"缺失依赖: {fileNotFound.FileName}");
-                        // 记录但不阻止启动
                         continue;
                     }
                 }
 
-                // 尝试从可加载的类型中查找窗体
                 var loadableTypes = ex.Types.Where(t => t != null);
                 var formTypes = loadableTypes.Where(t => typeof(Form).IsAssignableFrom(t) && !t.IsAbstract).ToList();
 
@@ -628,7 +695,6 @@ namespace AssetStudio.GUI
                             mainForm.StartPosition = FormStartPosition.CenterScreen;
                             mainForm.Show();
 
-                            // 显示警告但不阻止使用
                             MessageBox.Show($"{sb.ToString()}\n\n插件可能部分功能受限。",
                                 "依赖警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                             return;
@@ -652,14 +718,12 @@ namespace AssetStudio.GUI
             }
         }
 
-        // 程序集解析失败时的处理
         private static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
         {
             try
             {
                 string assemblyName = new AssemblyName(args.Name).Name;
 
-                // 尝试在插件目录中查找
                 string pluginPath = Path.Combine(pluginsDirectory, assemblyName + ".dll");
                 if (File.Exists(pluginPath))
                 {
@@ -699,8 +763,16 @@ namespace AssetStudio.GUI
                     {
                         File.Delete(filePath);
                     }
+                    if (plugin.IsZipFile && !string.IsNullOrEmpty(plugin.ExtractFolder))
+                    {
+                        string extractFolderPath = Path.Combine(pluginsDirectory, plugin.ExtractFolder);
+                        if (Directory.Exists(extractFolderPath))
+                        {
+                            Directory.Delete(extractFolderPath, true);
+                        }
+                    }
+                    InitializePlugins();
 
-                    plugin.IsDownloaded = false;
                     UpdateMainMenuItemText(plugin, menuItem);
                     if (menuItem.DropDownItems.Count >= 3)
                     {
@@ -740,7 +812,7 @@ namespace AssetStudio.GUI
 
         private static void ShowPluginManager()
         {
-            var managerForm = new PluginManagerForm(plugins);
+            var managerForm = new PluginManagerForm();
             managerForm.ShowDialog();
         }
 
@@ -763,7 +835,6 @@ namespace AssetStudio.GUI
             private bool isDownloadCompleted = false;
             private string filePath;
             private long totalBytes = 0;
-            private long totalDownloadedBytes = 0;
             private readonly object lockObject = new object();
             private Label speedLabel;
             private Label etaLabel;
@@ -806,14 +877,12 @@ namespace AssetStudio.GUI
                     Location = new Point(20, 80),
                     Size = new Size(200, 15)
                 };
-
                 etaLabel = new Label
                 {
                     Text = "剩余时间: --",
                     Location = new Point(20, 100),
                     Size = new Size(200, 15)
                 };
-
                 var cancelButton = new Button
                 {
                     Text = "取消",
@@ -876,14 +945,7 @@ namespace AssetStudio.GUI
 
                     totalBytes = await GetFileSize(plugin.DownloadUrl);
 
-                    if (totalBytes > 5 * 1024 * 1024)
-                    {
-                        await DownloadFileWithMultiThreadAsync(plugin.DownloadUrl, filePath, totalBytes);
-                    }
-                    else
-                    {
-                        await DownloadFileWithProgressAsync(plugin.DownloadUrl, filePath);
-                    }
+                    await DownloadFileWithProgressAsync(plugin.DownloadUrl, filePath);
 
                     statusLabel.Text = "下载完成！";
                     isDownloadCompleted = true;
@@ -930,63 +992,6 @@ namespace AssetStudio.GUI
                 return 0;
             }
 
-            private async Task DownloadFileWithMultiThreadAsync(string fileUrl, string savePath, long fileSize)
-            {
-                const int threadCount = 4;
-                var chunkSize = fileSize / threadCount;
-                var tasks = new List<Task>();
-
-                using (var fileStream = new FileStream(savePath, FileMode.Create, FileAccess.Write, FileShare.Write))
-                {
-                    fileStream.SetLength(fileSize);
-                }
-
-                totalDownloadedBytes = 0;
-                currentTotalBytes = fileSize;
-                for (int i = 0; i < threadCount; i++)
-                {
-                    var startByte = i * chunkSize;
-                    var endByte = (i == threadCount - 1) ? fileSize - 1 : (i + 1) * chunkSize - 1;
-                    tasks.Add(DownloadChunkAsync(fileUrl, savePath, startByte, endByte, i));
-                }
-
-                await Task.WhenAll(tasks);
-            }
-
-            private async Task DownloadChunkAsync(string fileUrl, string savePath, long startByte, long endByte, int chunkIndex)
-            {
-                using (var chunkClient = CreateOptimizedHttpClient())
-                {
-                    var request = new HttpRequestMessage(HttpMethod.Get, fileUrl);
-                    request.Headers.Range = new System.Net.Http.Headers.RangeHeaderValue(startByte, endByte);
-
-                    using (var response = await chunkClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead))
-                    {
-                        response.EnsureSuccessStatusCode();
-
-                        using (var stream = await response.Content.ReadAsStreamAsync())
-                        using (var fileStream = new FileStream(savePath, FileMode.Open, FileAccess.Write, FileShare.Write))
-                        {
-                            fileStream.Seek(startByte, SeekOrigin.Begin);
-
-                            var buffer = new byte[32768];
-                            int bytesRead;
-
-                            while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
-                            {
-                                await fileStream.WriteAsync(buffer, 0, bytesRead);
-
-                                lock (lockObject)
-                                {
-                                    totalDownloadedBytes += bytesRead;
-                                    UpdateProgressSafe();
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
             private async Task DownloadFileWithProgressAsync(string fileUrl, string savePath)
             {
                 using (var client = CreateOptimizedHttpClient())
@@ -1023,30 +1028,6 @@ namespace AssetStudio.GUI
                 }
             }
 
-            private void UpdateProgressSafe()
-            {
-                if (totalBytes <= 0) return;
-
-                var progress = (int)((double)totalDownloadedBytes / totalBytes * 100);
-                var speedInfo = downloadSpeedCalculator.GetSpeedInfo(totalDownloadedBytes, totalBytes);
-
-                if (progressBar.InvokeRequired)
-                {
-                    progressBar.Invoke(new Action(() => {
-                        progressBar.Value = Math.Min(progress, 100);
-                        statusLabel.Text = $"下载中: {progress}% ({FormatFileSize(totalDownloadedBytes)} / {FormatFileSize(totalBytes)})";
-                        speedLabel.Text = $"速度: {speedInfo.Speed:F1} {speedInfo.Unit}";
-                        etaLabel.Text = $"剩余时间: {speedInfo.ETA}";
-                    }));
-                }
-                else
-                {
-                    progressBar.Value = Math.Min(progress, 100);
-                    statusLabel.Text = $"下载中: {progress}% ({FormatFileSize(totalDownloadedBytes)} / {FormatFileSize(totalBytes)})";
-                    speedLabel.Text = $"速度: {speedInfo.Speed:F1} {speedInfo.Unit}";
-                    etaLabel.Text = $"剩余时间: {speedInfo.ETA}";
-                }
-            }
             private string FormatFileSize(long bytes)
             {
                 if (bytes >= 1024 * 1024 * 1024) // GB
@@ -1076,7 +1057,6 @@ namespace AssetStudio.GUI
                         progressBar.Value = percentage;
                         statusLabel.Text = $"下载中: {percentage}% ({FormatFileSize(bytesRead)} / {FormatFileSize(totalBytes)})";
                         speedLabel.Text = $"速度: {speedInfo.Speed:F1} {speedInfo.Unit}";
-                        etaLabel.Text = $"剩余时间: {speedInfo.ETA}";
                     }));
                 }
                 else
@@ -1084,7 +1064,6 @@ namespace AssetStudio.GUI
                     progressBar.Value = percentage;
                     statusLabel.Text = $"下载中: {percentage}% ({FormatFileSize(bytesRead)} / {FormatFileSize(totalBytes)})";
                     speedLabel.Text = $"速度: {speedInfo.Speed:F1} {speedInfo.Unit}";
-                    etaLabel.Text = $"剩余时间: {speedInfo.ETA}";
                 }
             }
 
@@ -1127,13 +1106,11 @@ namespace AssetStudio.GUI
 
         public class PluginManagerForm : Form
         {
-            private List<Plugins.PluginInfo> plugins;
             private ListView listView;
             private Panel buttonPanel;
 
-            public PluginManagerForm(List<Plugins.PluginInfo> plugins)
+            public PluginManagerForm()
             {
-                this.plugins = plugins;
                 InitializeComponent();
                 LoadPlugins();
             }
@@ -1219,7 +1196,7 @@ namespace AssetStudio.GUI
             private void LoadPlugins()
             {
                 listView.Items.Clear();
-                foreach (var plugin in plugins)
+                foreach (var plugin in Plugins.plugins)
                 {
                     var item = new ListViewItem(plugin.DisplayName);
                     item.SubItems.Add(plugin.IsDownloaded ? "已下载" : "未下载");
@@ -1270,8 +1247,11 @@ namespace AssetStudio.GUI
                         {
                             if (downloadDialog.DialogResult == DialogResult.OK)
                             {
-                                plugin.IsDownloaded = true;
+                                Plugins.InitializePlugins();
                                 LoadPlugins();
+
+                                RefreshMainPluginMenu();
+
                                 MessageBox.Show($"{plugin.DisplayName}下载完成！", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             }
                             downloadDialog.Dispose();
@@ -1310,16 +1290,56 @@ namespace AssetStudio.GUI
 
                         if (result == DialogResult.Yes)
                         {
-                            string filePath = Path.Combine(Plugins.pluginsDirectory, plugin.FileName);
-                            if (File.Exists(filePath))
+                            try
                             {
-                                File.Delete(filePath);
-                                plugin.IsDownloaded = false;
+                                string filePath = Path.Combine(Plugins.pluginsDirectory, plugin.FileName);
+                                if (File.Exists(filePath))
+                                {
+                                    File.Delete(filePath);
+                                }
+
+                                Plugins.InitializePlugins();
                                 LoadPlugins();
+
+                                // 刷新主程序的插件菜单
+                                RefreshMainPluginMenu();
+
                                 MessageBox.Show($"{plugin.DisplayName}卸载完成！", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            }
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show($"卸载{plugin.DisplayName}失败: {ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             }
                         }
                     }
+                }
+            }
+
+            private void RefreshMainPluginMenu()
+            {
+                try
+                {
+                    var mainForm = Application.OpenForms.OfType<MainForm>().FirstOrDefault();
+                    if (mainForm != null)
+                    {
+                        var pluginMenu = mainForm.MenuStrip1.Items["toolStripMenuItem20"] as ToolStripMenuItem;
+                        if (pluginMenu != null)
+                        {
+                            var ownerControl = pluginMenu.Owner;
+                            if (ownerControl != null && ownerControl.InvokeRequired)
+                            {
+                                ownerControl.Invoke(new Action(() => Plugins.AddMenuItemsToPluginMenu(pluginMenu)));
+                            }
+                            else
+                            {
+                                Plugins.AddMenuItemsToPluginMenu(pluginMenu);
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"刷新主菜单失败: {ex.Message}");
                 }
             }
         }
