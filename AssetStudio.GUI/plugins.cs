@@ -28,6 +28,16 @@ namespace AssetStudio.GUI
             public bool IsZipFile { get; set; }
             public string ExeFileName { get; set; }
             public string ExtractFolder { get; set; }
+            public string PluginType
+            {
+                get
+                {
+                    if (IsBuiltInDll) return "类库文件";
+                    if (IsExternalTool) return "可执行程序";
+                    if (IsZipFile) return "压缩包文件";
+                    return "PE文件";
+                }
+            }
         }
 
         public static List<PluginInfo> plugins = new List<PluginInfo>
@@ -233,18 +243,114 @@ namespace AssetStudio.GUI
                 IsBuiltInDll = false
             },
             new PluginInfo
-            {
-                Name = "FSBank",
-                DisplayName = "FSB打包工具",
-                DownloadUrl = "https://gitee.com/valkylia-goddess/AssetStudio-Neptune/releases/download/down/fsbank.zip",
-                FileName = "fsbank.zip",
-                 IsDownloaded = false,
-                 IsExternalTool = true,
-                 IsBuiltInDll = false,
-                 IsZipFile = true,
-                 ExeFileName = "fsbank.exe",
-                 ExtractFolder = "fsbank"
-            }
+                {
+                    Name = "CpkFileBuilder",
+                    DisplayName = "CPK官方打包解包工具",
+                    DownloadUrl = "https://gitee.com/valkylia-goddess/AssetStudio-Neptune/releases/download/down/CpkFileBuilder.zip",
+                    FileName = "CpkFileBuilder.zip",
+                    IsExternalTool = true,
+                    IsBuiltInDll = false,
+                    IsZipFile = true,
+                    ExeFileName = "CpkFileBuilder.exe",
+                    ExtractFolder = "CpkFileBuilder"
+                },
+                new PluginInfo
+                {
+                    Name = "IDM",
+                    DisplayName = "IDM下载器",
+                    DownloadUrl = "https://gitee.com/valkylia-goddess/AssetStudio-Neptune/releases/download/down/IDM.zip",
+                    FileName = "IDM.zip",
+                    IsExternalTool = true,
+                    IsBuiltInDll = false,
+                    IsZipFile = true,
+                    ExeFileName = "IDMan.exe",
+                    ExtractFolder = "IDM"
+                },
+                new PluginInfo
+                {
+                    Name = "PVRViewer",
+                    DisplayName = "世嘉游戏PVR查看器",
+                    DownloadUrl = "https://gitee.com/valkylia-goddess/AssetStudio-Neptune/releases/download/down/PVRViewer.zip",
+                    FileName = "PVRViewer.zip",
+                    IsExternalTool = true,
+                    IsBuiltInDll = false,
+                    IsZipFile = true,
+                    ExeFileName = "PVRViewer.exe",
+                    ExtractFolder = "PVRViewer"
+                },
+                new PluginInfo
+                {
+                    Name = "GD-ROM-Explorer",
+                    DisplayName = "世嘉游戏rom解包器",
+                    DownloadUrl = "https://gitee.com/valkylia-goddess/AssetStudio-Neptune/releases/download/down/GD-ROM-Explorer.zip",
+                    FileName = "GD-ROM-Explorer.zip",
+                    IsExternalTool = true,
+                    IsBuiltInDll = false,
+                    IsZipFile = true,
+                    ExeFileName = "GD-ROM Explorer.exe",
+                    ExtractFolder = "GD-ROM-Explorer"
+                },
+                new PluginInfo
+                {
+                    Name = "CDmage",
+                    DisplayName = "光盘rom解包器",
+                    DownloadUrl = "https://gitee.com/valkylia-goddess/AssetStudio-Neptune/releases/download/down/CDmage.zip",
+                    FileName = "CDmage.zip",
+                    IsExternalTool = true,
+                    IsBuiltInDll = false,
+                    IsZipFile = true,
+                    ExeFileName = "CDmage.exe",
+                    ExtractFolder = "CDmage"
+                },
+                new PluginInfo
+                {
+                    Name = "VGMTrans",
+                    DisplayName = "VGMTrans音频提取器",
+                    DownloadUrl = "https://gitee.com/valkylia-goddess/AssetStudio-Neptune/releases/download/down/VGMTrans.zip",
+                    FileName = "VGMTrans.zip",
+                    IsExternalTool = true,
+                    IsBuiltInDll = false,
+                    IsZipFile = true,
+                    ExeFileName = "VGMTrans.exe",
+                    ExtractFolder = "VGMTrans"
+                },
+                new PluginInfo
+                {
+                    Name = "CitricComposer",
+                    DisplayName = "柠檬音乐工坊",
+                    DownloadUrl = "https://gitee.com/valkylia-goddess/AssetStudio-Neptune/releases/download/down/CitricComposer.zip",
+                    FileName = "CitricComposer.zip",
+                    IsExternalTool = true,
+                    IsBuiltInDll = false,
+                    IsZipFile = true,
+                    ExeFileName = "Citric Composer.exe",
+                    ExtractFolder = "CitricComposer"
+                },
+                new PluginInfo
+                {
+                    Name = "toolbox",
+                    DisplayName = "任天堂toolbox",
+                    DownloadUrl = "https://gitee.com/valkylia-goddess/AssetStudio-Neptune/releases/download/down/toolbox.zip",
+                    FileName = "toolbox.zip",
+                    IsExternalTool = true,
+                    IsBuiltInDll = false,
+                    IsZipFile = true,
+                    ExeFileName = "toolbox.exe",
+                    ExtractFolder = "toolbox"
+                },
+                new PluginInfo
+                {
+                    Name = "FSBank",
+                    DisplayName = "FSB打包工具",
+                    DownloadUrl = "https://gitee.com/valkylia-goddess/AssetStudio-Neptune/releases/download/down/fsbank.zip",
+                    FileName = "fsbank.zip",
+                   IsDownloaded = false,
+                   IsExternalTool = true,
+                   IsBuiltInDll = false,
+                   IsZipFile = true,
+                   ExeFileName = "fsbank.exe",
+                   ExtractFolder = "fsbank"
+                }
         };
 
         public static string pluginsDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "plugins");
@@ -258,19 +364,79 @@ namespace AssetStudio.GUI
 
             foreach (var plugin in plugins)
             {
-                string filePath;
-                if (plugin.IsZipFile && !string.IsNullOrEmpty(plugin.ExtractFolder))
-                {
-                    filePath = Path.Combine(pluginsDirectory, plugin.ExtractFolder, plugin.ExeFileName);
-                }
-                else
-                {
-                    filePath = Path.Combine(pluginsDirectory, plugin.FileName);
-                }
-                plugin.IsDownloaded = File.Exists(filePath);
+                string filePath = FindExecutableFile(plugin);
+                plugin.IsDownloaded = filePath != null && File.Exists(filePath);
+
+                Debug.WriteLine($"{plugin.DisplayName}: IsDownloaded = {plugin.IsDownloaded}, Path = {filePath}");
             }
         }
+        private static string FindExecutableFile(PluginInfo plugin)
+        {
+            if (plugin.IsZipFile && !string.IsNullOrEmpty(plugin.ExtractFolder))
+            {
+                string extractFolderPath = Path.Combine(pluginsDirectory, plugin.ExtractFolder);
 
+                if (!Directory.Exists(extractFolderPath))
+                    return null;
+
+                string directPath = Path.Combine(extractFolderPath, plugin.ExeFileName);
+                if (File.Exists(directPath))
+                    return directPath;
+
+                try
+                {
+                    var files = Directory.GetFiles(extractFolderPath, plugin.ExeFileName, SearchOption.AllDirectories);
+                    if (files.Length > 0)
+                        return files[0];
+
+                    var allExeFiles = Directory.GetFiles(extractFolderPath, "*.exe", SearchOption.AllDirectories);
+                    if (allExeFiles.Length > 0)
+                    {
+                        var bestMatch = allExeFiles.FirstOrDefault(f =>
+                            Path.GetFileNameWithoutExtension(f).Contains(plugin.Name, StringComparison.OrdinalIgnoreCase) ||
+                            Path.GetFileNameWithoutExtension(f).Contains(Path.GetFileNameWithoutExtension(plugin.ExeFileName), StringComparison.OrdinalIgnoreCase));
+
+                        return bestMatch ?? allExeFiles[0];
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"查找可执行文件时出错: {ex.Message}");
+                    return null;
+                }
+            }
+            else if (plugin.IsBuiltInDll)
+            {
+                string filePath = Path.Combine(pluginsDirectory, plugin.FileName);
+                return File.Exists(filePath) ? filePath : null;
+            }
+            else
+            {
+                string filePath = Path.Combine(pluginsDirectory, plugin.FileName);
+                return File.Exists(filePath) ? filePath : null;
+            }
+
+            return null;
+        }
+
+        private static void CopyDirectory(DirectoryInfo source, DirectoryInfo target)
+        {
+            if (!target.Exists)
+            {
+                target.Create();
+            }
+
+            foreach (FileInfo file in source.GetFiles())
+            {
+                file.CopyTo(Path.Combine(target.FullName, file.Name), true);
+            }
+
+            foreach (DirectoryInfo subDir in source.GetDirectories())
+            {
+                DirectoryInfo nextTargetSubDir = target.CreateSubdirectory(subDir.Name);
+                CopyDirectory(subDir, nextTargetSubDir);
+            }
+        }
         public static ToolStripMenuItem CreatePluginMenuItem(PluginInfo plugin)
         {
             var menuItem = new ToolStripMenuItem();
@@ -296,8 +462,8 @@ namespace AssetStudio.GUI
 
             menuItem.MouseEnter += (sender, e) =>
             {
-                string filePath = Path.Combine(pluginsDirectory, plugin.FileName);
-                bool fileExists = File.Exists(filePath);
+                string detectedPath = FindExecutableFile(plugin);
+                bool fileExists = detectedPath != null && File.Exists(detectedPath);
 
                 if (fileExists != plugin.IsDownloaded)
                 {
@@ -307,7 +473,6 @@ namespace AssetStudio.GUI
                 }
 
                 CloseOtherPluginDropDowns(menuItem);
-
                 menuItem.ShowDropDown();
             };
 
@@ -528,44 +693,56 @@ namespace AssetStudio.GUI
                 if (downloadDialog.DialogResult == DialogResult.OK)
                 {
                     string filePath = Path.Combine(pluginsDirectory, plugin.FileName);
-                    if (File.Exists(filePath))
-                    {
-                        if (plugin.IsZipFile)
-                        {
-                            try
-                            {
-                                string extractPath = Path.Combine(pluginsDirectory, plugin.ExtractFolder);
-                                if (!Directory.Exists(extractPath))
-                                {
-                                    Directory.CreateDirectory(extractPath);
-                                }
-                                System.IO.Compression.ZipFile.ExtractToDirectory(filePath, extractPath, true);
 
-                                File.Delete(filePath);
-                            }
-                            catch (Exception ex)
-                            {
-                                MessageBox.Show($"解压失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                return;
-                            }
-                        }
-                        plugin.IsDownloaded = true;
-                        UpdateMainMenuItemText(plugin, menuItem);
-                        if (menuItem.DropDownItems.Count >= 3)
-                        {
-                            UpdateSubMenuItemsState(plugin,
-                                menuItem.DropDownItems[0] as ToolStripMenuItem,
-                                menuItem.DropDownItems[1] as ToolStripMenuItem,
-                                menuItem.DropDownItems[2] as ToolStripMenuItem);
-                        }
-                        MessageBox.Show($"{plugin.DisplayName}下载完成！", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                    else
+                    if (plugin.IsZipFile && File.Exists(filePath))
                     {
-                        MessageBox.Show($"{plugin.DisplayName}下载文件验证失败！", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        try
+                        {
+                            string extractPath = Path.Combine(pluginsDirectory, plugin.ExtractFolder);
+
+                            if (Directory.Exists(extractPath))
+                            {
+                                Directory.Delete(extractPath, true);
+                            }
+
+                            Directory.CreateDirectory(extractPath);
+
+                            System.IO.Compression.ZipFile.ExtractToDirectory(filePath, extractPath, true);
+
+                            string foundExePath = FindExecutableFile(plugin);
+                            if (foundExePath == null)
+                            {
+                                throw new FileNotFoundException($"在解压后的文件中找不到 {plugin.ExeFileName}");
+                            }
+
+                            File.Delete(filePath);
+
+                            Debug.WriteLine($"{plugin.DisplayName} 解压完成，找到文件: {foundExePath}");
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show($"解压失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
+                        }
                     }
+
+                    InitializePlugins();
+
+                    UpdateMainMenuItemText(plugin, menuItem);
+                    if (menuItem.DropDownItems.Count >= 3)
+                    {
+                        UpdateSubMenuItemsState(plugin,
+                            menuItem.DropDownItems[0] as ToolStripMenuItem,
+                            menuItem.DropDownItems[1] as ToolStripMenuItem,
+                            menuItem.DropDownItems[2] as ToolStripMenuItem);
+                    }
+
+                    MessageBox.Show($"{plugin.DisplayName}下载完成！", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
-
+                else
+                {
+                    InitializePlugins();
+                }
                 downloadDialog.Dispose();
             };
 
@@ -587,17 +764,9 @@ namespace AssetStudio.GUI
 
             try
             {
-                string filePath;
-                if (plugin.IsZipFile)
-                {
-                    filePath = Path.Combine(pluginsDirectory, plugin.ExtractFolder, plugin.ExeFileName);
-                }
-                else
-                {
-                    filePath = Path.Combine(pluginsDirectory, plugin.FileName);
-                }
+                string filePath = FindExecutableFile(plugin);
 
-                if (!File.Exists(filePath))
+                if (filePath == null)
                 {
                     plugin.IsDownloaded = false;
                     MessageBox.Show($"{plugin.DisplayName} 文件不存在，请重新下载", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -606,7 +775,14 @@ namespace AssetStudio.GUI
 
                 if (plugin.IsExternalTool || plugin.IsZipFile)
                 {
-                    Process.Start(filePath);
+                    string workingDirectory = Path.GetDirectoryName(filePath);
+                    ProcessStartInfo startInfo = new ProcessStartInfo
+                    {
+                        FileName = filePath,
+                        WorkingDirectory = workingDirectory,
+                        UseShellExecute = true
+                    };
+                    Process.Start(startInfo);
                 }
                 else if (plugin.IsBuiltInDll)
                 {
@@ -758,11 +934,6 @@ namespace AssetStudio.GUI
             {
                 try
                 {
-                    string filePath = Path.Combine(pluginsDirectory, plugin.FileName);
-                    if (File.Exists(filePath))
-                    {
-                        File.Delete(filePath);
-                    }
                     if (plugin.IsZipFile && !string.IsNullOrEmpty(plugin.ExtractFolder))
                     {
                         string extractFolderPath = Path.Combine(pluginsDirectory, plugin.ExtractFolder);
@@ -771,6 +942,15 @@ namespace AssetStudio.GUI
                             Directory.Delete(extractFolderPath, true);
                         }
                     }
+                    else
+                    {
+                        string filePath = Path.Combine(pluginsDirectory, plugin.FileName);
+                        if (File.Exists(filePath))
+                        {
+                            File.Delete(filePath);
+                        }
+                    }
+
                     InitializePlugins();
 
                     UpdateMainMenuItemText(plugin, menuItem);
@@ -1198,21 +1378,16 @@ namespace AssetStudio.GUI
                 listView.Items.Clear();
                 foreach (var plugin in Plugins.plugins)
                 {
+                    string filePath = Plugins.FindExecutableFile(plugin);
+                    plugin.IsDownloaded = filePath != null && File.Exists(filePath);
+
                     var item = new ListViewItem(plugin.DisplayName);
                     item.SubItems.Add(plugin.IsDownloaded ? "已下载" : "未下载");
                     item.SubItems.Add(plugin.FileName);
 
-                    string pluginType = "外部工具";
-                    if (plugin.IsBuiltInDll)
-                    {
-                        pluginType = "内置DLL工具";
-                    }
-                    else if (!plugin.IsExternalTool)
-                    {
-                        pluginType = "内置工具";
-                    }
-                    item.SubItems.Add(pluginType);
+                    string pluginType = plugin.PluginType;
 
+                    item.SubItems.Add(pluginType);
                     item.Tag = plugin;
 
                     if (plugin.IsDownloaded)
@@ -1292,16 +1467,26 @@ namespace AssetStudio.GUI
                         {
                             try
                             {
-                                string filePath = Path.Combine(Plugins.pluginsDirectory, plugin.FileName);
-                                if (File.Exists(filePath))
+                                if (plugin.IsZipFile && !string.IsNullOrEmpty(plugin.ExtractFolder))
                                 {
-                                    File.Delete(filePath);
+                                    string extractFolderPath = Path.Combine(Plugins.pluginsDirectory, plugin.ExtractFolder);
+                                    if (Directory.Exists(extractFolderPath))
+                                    {
+                                        Directory.Delete(extractFolderPath, true);
+                                    }
+                                }
+                                else
+                                {
+                                    string filePath = Path.Combine(Plugins.pluginsDirectory, plugin.FileName);
+                                    if (File.Exists(filePath))
+                                    {
+                                        File.Delete(filePath);
+                                    }
                                 }
 
                                 Plugins.InitializePlugins();
                                 LoadPlugins();
 
-                                // 刷新主程序的插件菜单
                                 RefreshMainPluginMenu();
 
                                 MessageBox.Show($"{plugin.DisplayName}卸载完成！", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
