@@ -94,9 +94,6 @@
 		<None Update="xinyuetongxing.dll">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
-		<None Update="超级工具箱提取器转换器用途.xlsx">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
 	</ItemGroup>
 
 	<Target Name="CopyBmsScriptFolder" AfterTargets="AfterBuild">
