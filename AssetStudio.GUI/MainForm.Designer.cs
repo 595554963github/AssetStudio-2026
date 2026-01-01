@@ -279,7 +279,7 @@ namespace AssetStudio.GUI
             displayAll.Name = "displayAll";
             displayAll.Size = new System.Drawing.Size(171, 22);
             displayAll.Text = "显示所有资源";
-            displayAll.ToolTipText = "选中此选项将显示所有类型的资产.不可提取的资产可以导出RAW文件.";
+            displayAll.ToolTipText = "选中此选项将显示所有类型的资源.不可提取的资源可以导出RAW文件.";
             displayAll.CheckedChanged += displayAll_CheckedChanged;
             // 
             // toolStripSeparator10
@@ -295,7 +295,7 @@ namespace AssetStudio.GUI
             enablePreview.Name = "enablePreview";
             enablePreview.Size = new System.Drawing.Size(171, 22);
             enablePreview.Text = "启用预览";
-            enablePreview.ToolTipText = "切换可读资产的加载和预览,如图像、声音、文字等.如果您有性能或兼容性问题,请禁用预览.";
+            enablePreview.ToolTipText = "切换可读资源的加载和预览,如图像、声音、文字等.如果您有性能或兼容性问题,请禁用预览.";
             enablePreview.CheckedChanged += enablePreview_Check;
             // 
             // enableModelPreview
@@ -326,8 +326,8 @@ namespace AssetStudio.GUI
             displayInfo.CheckState = CheckState.Checked;
             displayInfo.Name = "displayInfo";
             displayInfo.Size = new System.Drawing.Size(171, 22);
-            displayInfo.Text = "显示资产信息";
-            displayInfo.ToolTipText = "切换显示每个资产信息的覆盖层,例如图像大小、格式、音频比特率等.";
+            displayInfo.Text = "显示资源信息";
+            displayInfo.ToolTipText = "切换显示每个资源信息的覆盖层,例如图像大小、格式、音频比特率等.";
             displayInfo.CheckedChanged += displayAssetInfo_Check;
             // 
             // enableResolveDependencies
@@ -338,7 +338,7 @@ namespace AssetStudio.GUI
             enableResolveDependencies.Name = "enableResolveDependencies";
             enableResolveDependencies.Size = new System.Drawing.Size(171, 22);
             enableResolveDependencies.Text = "启用解析依赖项";
-            enableResolveDependencies.ToolTipText = "切换加载资产的行为,禁用加载没有依赖项的文件.";
+            enableResolveDependencies.ToolTipText = "切换加载资源的行为,禁用加载没有依赖项的文件.";
             enableResolveDependencies.CheckedChanged += enableResolveDependencies_CheckedChanged;
             // 
             // allowDuplicates
@@ -347,7 +347,7 @@ namespace AssetStudio.GUI
             allowDuplicates.Name = "allowDuplicates";
             allowDuplicates.Size = new System.Drawing.Size(171, 22);
             allowDuplicates.Text = "允许重复";
-            allowDuplicates.ToolTipText = "切换导出资产的行为,启用以允许导出具有重复名称的资产.";
+            allowDuplicates.ToolTipText = "切换导出资源的行为,启用以允许导出具有重复名称的资源.";
             allowDuplicates.CheckedChanged += allowDuplicates_CheckedChanged;
             // 
             // skipContainer
@@ -502,21 +502,21 @@ namespace AssetStudio.GUI
             // 
             exportAllAssetsMenuItem.Name = "exportAllAssetsMenuItem";
             exportAllAssetsMenuItem.Size = new System.Drawing.Size(193, 22);
-            exportAllAssetsMenuItem.Text = "所有资产";
+            exportAllAssetsMenuItem.Text = "所有资源";
             exportAllAssetsMenuItem.Click += exportAllAssetsMenuItem_Click;
             // 
             // exportSelectedAssetsMenuItem
             // 
             exportSelectedAssetsMenuItem.Name = "exportSelectedAssetsMenuItem";
             exportSelectedAssetsMenuItem.Size = new System.Drawing.Size(193, 22);
-            exportSelectedAssetsMenuItem.Text = "选定的资产";
+            exportSelectedAssetsMenuItem.Text = "选定的资源";
             exportSelectedAssetsMenuItem.Click += exportSelectedAssetsMenuItem_Click;
             // 
             // exportFilteredAssetsMenuItem
             // 
             exportFilteredAssetsMenuItem.Name = "exportFilteredAssetsMenuItem";
             exportFilteredAssetsMenuItem.Size = new System.Drawing.Size(193, 22);
-            exportFilteredAssetsMenuItem.Text = "过滤的资产";
+            exportFilteredAssetsMenuItem.Text = "过滤的资源";
             exportFilteredAssetsMenuItem.Click += exportFilteredAssetsMenuItem_Click;
             // 
             // toolStripSeparator3
@@ -547,21 +547,21 @@ namespace AssetStudio.GUI
             // 
             toolStripMenuItem4.Name = "toolStripMenuItem4";
             toolStripMenuItem4.Size = new System.Drawing.Size(136, 22);
-            toolStripMenuItem4.Text = "所有资产";
+            toolStripMenuItem4.Text = "所有资源";
             toolStripMenuItem4.Click += toolStripMenuItem4_Click;
             // 
             // toolStripMenuItem5
             // 
             toolStripMenuItem5.Name = "toolStripMenuItem5";
             toolStripMenuItem5.Size = new System.Drawing.Size(136, 22);
-            toolStripMenuItem5.Text = "选定的资产";
+            toolStripMenuItem5.Text = "选定的资源";
             toolStripMenuItem5.Click += toolStripMenuItem5_Click;
             // 
             // toolStripMenuItem6
             // 
             toolStripMenuItem6.Name = "toolStripMenuItem6";
             toolStripMenuItem6.Size = new System.Drawing.Size(136, 22);
-            toolStripMenuItem6.Text = "过滤的资产";
+            toolStripMenuItem6.Text = "过滤的资源";
             toolStripMenuItem6.Click += toolStripMenuItem6_Click;
             // 
             // toolStripMenuItem3
@@ -575,21 +575,21 @@ namespace AssetStudio.GUI
             // 
             toolStripMenuItem7.Name = "toolStripMenuItem7";
             toolStripMenuItem7.Size = new System.Drawing.Size(136, 22);
-            toolStripMenuItem7.Text = "所有资产";
+            toolStripMenuItem7.Text = "所有资源";
             toolStripMenuItem7.Click += toolStripMenuItem7_Click;
             // 
             // toolStripMenuItem8
             // 
             toolStripMenuItem8.Name = "toolStripMenuItem8";
             toolStripMenuItem8.Size = new System.Drawing.Size(136, 22);
-            toolStripMenuItem8.Text = "选定的资产";
+            toolStripMenuItem8.Text = "选定的资源";
             toolStripMenuItem8.Click += toolStripMenuItem8_Click;
             // 
             // toolStripMenuItem9
             // 
             toolStripMenuItem9.Name = "toolStripMenuItem9";
             toolStripMenuItem9.Size = new System.Drawing.Size(136, 22);
-            toolStripMenuItem9.Text = "过滤的资产";
+            toolStripMenuItem9.Text = "过滤的资源";
             toolStripMenuItem9.Click += toolStripMenuItem9_Click;
             // 
             // toolStripMenuItem16
@@ -603,21 +603,21 @@ namespace AssetStudio.GUI
             // 
             toolStripMenuItem17.Name = "toolStripMenuItem17";
             toolStripMenuItem17.Size = new System.Drawing.Size(136, 22);
-            toolStripMenuItem17.Text = "所有资产";
+            toolStripMenuItem17.Text = "所有资源";
             toolStripMenuItem17.Click += toolStripMenuItem17_Click;
             // 
             // toolStripMenuItem24
             // 
             toolStripMenuItem24.Name = "toolStripMenuItem24";
             toolStripMenuItem24.Size = new System.Drawing.Size(136, 22);
-            toolStripMenuItem24.Text = "选定的资产";
+            toolStripMenuItem24.Text = "选定的资源";
             toolStripMenuItem24.Click += toolStripMenuItem24_Click;
             // 
             // toolStripMenuItem25
             // 
             toolStripMenuItem25.Name = "toolStripMenuItem25";
             toolStripMenuItem25.Size = new System.Drawing.Size(136, 22);
-            toolStripMenuItem25.Text = "过滤的资产";
+            toolStripMenuItem25.Text = "过滤的资源";
             toolStripMenuItem25.Click += toolStripMenuItem25_Click;
             // 
             // toolStripSeparator2
@@ -630,27 +630,27 @@ namespace AssetStudio.GUI
             toolStripMenuItem10.DropDownItems.AddRange(new ToolStripItem[] { toolStripMenuItem11, toolStripMenuItem12, toolStripMenuItem13 });
             toolStripMenuItem10.Name = "toolStripMenuItem10";
             toolStripMenuItem10.Size = new System.Drawing.Size(193, 22);
-            toolStripMenuItem10.Text = "资产列表到XML";
+            toolStripMenuItem10.Text = "资源列表到XML";
             // 
             // toolStripMenuItem11
             // 
             toolStripMenuItem11.Name = "toolStripMenuItem11";
             toolStripMenuItem11.Size = new System.Drawing.Size(136, 22);
-            toolStripMenuItem11.Text = "所有资产";
+            toolStripMenuItem11.Text = "所有资源";
             toolStripMenuItem11.Click += toolStripMenuItem11_Click;
             // 
             // toolStripMenuItem12
             // 
             toolStripMenuItem12.Name = "toolStripMenuItem12";
             toolStripMenuItem12.Size = new System.Drawing.Size(136, 22);
-            toolStripMenuItem12.Text = "选定的资产";
+            toolStripMenuItem12.Text = "选定的资源";
             toolStripMenuItem12.Click += toolStripMenuItem12_Click;
             // 
             // toolStripMenuItem13
             // 
             toolStripMenuItem13.Name = "toolStripMenuItem13";
             toolStripMenuItem13.Size = new System.Drawing.Size(136, 22);
-            toolStripMenuItem13.Text = "过滤的资产";
+            toolStripMenuItem13.Text = "过滤的资源";
             toolStripMenuItem13.Click += toolStripMenuItem13_Click;
             // 
             // sceneHierarchy
@@ -780,20 +780,20 @@ namespace AssetStudio.GUI
             // 
             assetMapNameTextBox.Name = "assetMapNameTextBox";
             assetMapNameTextBox.Size = new System.Drawing.Size(100, 23);
-            assetMapNameTextBox.ToolTipText = "在此处输入资产映射名称";
+            assetMapNameTextBox.ToolTipText = "在此处输入资源映射名称";
             // 
             // buildAssetMapToolStripMenuItem
             // 
             buildAssetMapToolStripMenuItem.Name = "buildAssetMapToolStripMenuItem";
             buildAssetMapToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
-            buildAssetMapToolStripMenuItem.Text = "构建资产映射";
+            buildAssetMapToolStripMenuItem.Text = "构建资源映射";
             buildAssetMapToolStripMenuItem.Click += buildAssetMapToolStripMenuItem_Click;
             // 
             // assetMapTypeMenuItem
             // 
             assetMapTypeMenuItem.Name = "assetMapTypeMenuItem";
             assetMapTypeMenuItem.Size = new System.Drawing.Size(181, 22);
-            assetMapTypeMenuItem.Text = "资产映射类型";
+            assetMapTypeMenuItem.Text = "资源映射类型";
             assetMapTypeMenuItem.DropDownItemClicked += assetMapTypeMenuItem_DropDownItemClicked;
             // 
             // toolStripSeparator8
@@ -928,7 +928,7 @@ namespace AssetStudio.GUI
             tabPage2.Name = "tabPage2";
             tabPage2.Size = new System.Drawing.Size(472, 604);
             tabPage2.TabIndex = 1;
-            tabPage2.Text = "资产列表";
+            tabPage2.Text = "资源列表";
             tabPage2.UseVisualStyleBackColor = true;
             // 
             // assetListView
@@ -1345,7 +1345,7 @@ namespace AssetStudio.GUI
             // 
             exportSelectedAssetsToolStripMenuItem.Name = "exportSelectedAssetsToolStripMenuItem";
             exportSelectedAssetsToolStripMenuItem.Size = new System.Drawing.Size(217, 22);
-            exportSelectedAssetsToolStripMenuItem.Text = "导出选定的资产";
+            exportSelectedAssetsToolStripMenuItem.Text = "导出选定的资源";
             exportSelectedAssetsToolStripMenuItem.Click += exportSelectedAssetsToolStripMenuItem_Click;
             // 
             // exportAnimatorwithselectedAnimationClipMenuItem
