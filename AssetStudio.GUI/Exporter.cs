@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System.Collections.Generic;
 using System.IO;
@@ -374,7 +374,7 @@ namespace AssetStudio.GUI
                 : new ModelConverter(m_Animator, options);
             if (options.exportMaterials)
             {
-                var materialExportPath = Path.Combine(Path.GetDirectoryName(exportFullPath), "Materials");
+                var materialExportPath = Path.Combine(Path.GetDirectoryName(exportFullPath), "材质");
                 Directory.CreateDirectory(materialExportPath);
                 foreach (var material in options.materials)
                 {
