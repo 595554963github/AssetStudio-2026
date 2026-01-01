@@ -1,8 +1,5 @@
 using AssetStudio.PInvoke;
-using FMOD;
 using Newtonsoft.Json;
-using OpenTK.Audio.OpenAL;
-using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 using System;
@@ -17,9 +14,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Timers;
 using System.Windows.Forms;
 using static AssetStudio.GUI.Studio;
 
@@ -123,7 +118,7 @@ namespace AssetStudio.GUI
         {
             logger = new GUILogger(StatusStripUpdate);
             ConsoleHelper.AllocConsole();
-            ConsoleHelper.SetConsoleTitle("DebugConsole");
+            ConsoleHelper.SetConsoleTitle("调试控制台");
             var handle = ConsoleHelper.GetConsoleWindow();
             if (enableConsole.Checked)
             {
@@ -137,9 +132,19 @@ namespace AssetStudio.GUI
             }
             var loggerEventType = (LoggerEvent)Properties.Settings.Default.loggerEventType;
             var loggerEventTypes = Enum.GetValues<LoggerEvent>().ToArray()[1..^1];
+
+            loggedEventsMenuItem.DropDownItems.Clear();
+
             foreach (var loggerEvent in loggerEventTypes)
             {
-                var menuItem = new ToolStripMenuItem(loggerEvent.ToString()) { CheckOnClick = true, Checked = loggerEventType.HasFlag(loggerEvent), Tag = (int)loggerEvent };
+                string displayName = loggerEvent.GetChineseName();
+
+                var menuItem = new ToolStripMenuItem(displayName)
+                {
+                    CheckOnClick = true,
+                    Checked = loggerEventType.HasFlag(loggerEvent),
+                    Tag = (int)loggerEvent
+                };
                 loggedEventsMenuItem.DropDownItems.Add(menuItem);
             }
             Logger.Flags = loggerEventType;
@@ -162,7 +167,8 @@ namespace AssetStudio.GUI
                 assetMapTypeMenuItem.DropDownItems.Add(menuItem);
             }
 
-            specifyGame.Items.AddRange(GameManager.GetGames());
+            var chineseNames = EnumDictionary.GetChineseNameArray();
+            specifyGame.Items.AddRange(chineseNames);
             int selectedIndex = Properties.Settings.Default.selectedGame;
             if (selectedIndex >= 0 && selectedIndex < specifyGame.Items.Count)
             {
@@ -395,12 +401,12 @@ namespace AssetStudio.GUI
                 allToolStripMenuItem.Checked = true;
             }
 
-            var log = $"加载可导出资产完毕{assetsManager.assetsFileList.Count} files with {assetListView.Items.Count}";
+            var log = $"加载可导出资源完毕{assetsManager.assetsFileList.Count} files with {assetListView.Items.Count}";
             var m_ObjectsCount = assetsManager.assetsFileList.Sum(x => x.m_Objects.Count);
             var objectsCount = assetsManager.assetsFileList.Sum(x => x.Objects.Count);
             if (m_ObjectsCount != objectsCount)
             {
-                log += $"其中{m_ObjectsCount - objectsCount}资产无法读取";
+                log += $"其中{m_ObjectsCount - objectsCount}资源无法读取";
             }
             StatusStripUpdate(log);
         }
@@ -1346,7 +1352,7 @@ namespace AssetStudio.GUI
                 CreateVAO();
                 StatusStripUpdate("使用OpenGL版本: " + GL.GetString(StringName.Version) + "\n"
                                   + "'鼠标左键'=旋转 | '鼠标右键'=移动 | '鼠标滚轮'=变焦 \n"
-                                  + "'Ctrl W'=线框图 | 'Ctrl S'=阴影 | 'Ctrl N'=恢复正常 ");
+                                  + "'Ctrl W'=线框图 | 'Ctrl S'=阴影 | 'Ctrl N'=恢复Normal ");
             }
             else
             {
@@ -1462,7 +1468,7 @@ namespace AssetStudio.GUI
                 glControl.Visible = true;
                 CreateVAO();
                 StatusStripUpdate("使用OpenGL版本: " + GL.GetString(StringName.Version) + "\n"
-                                  + "'鼠标左键'=旋转 | '鼠标右键'=移动 | '鼠标滚轮'=变焦 \n'Ctrl W'=线框图 | 'Ctrl S'=阴影 | 'Ctrl N'=恢复正常 ");
+                                  + "'鼠标左键'=旋转 | '鼠标右键'=移动 | '鼠标滚轮'=变焦 \n'Ctrl W'=线框图 | 'Ctrl S'=阴影 | 'Ctrl N'=恢复Normal ");
             }
             else
             {
@@ -2041,7 +2047,7 @@ namespace AssetStudio.GUI
             }
             else
             {
-                StatusStripUpdate("未加载可导出资产");
+                StatusStripUpdate("未加载可导出资源");
             }
         }
 
@@ -2075,7 +2081,7 @@ namespace AssetStudio.GUI
             }
             else
             {
-                StatusStripUpdate("未加载可导出资产");
+                StatusStripUpdate("未加载可导出资源");
             }
         }
 
@@ -2259,8 +2265,9 @@ namespace AssetStudio.GUI
             ResetForm();
 
             Studio.Game = GameManager.GetGame(Properties.Settings.Default.selectedGame);
-            Logger.Info($"目标游戏是{Studio.Game.Name}");
-
+            var gameType = Studio.Game.Type;
+            var chineseName = gameType.GetChineseName();
+            Logger.Info($"目标游戏是{chineseName}({gameType})");
             if (Studio.Game.Type.IsUnityCN())
             {
                 UnityCNManager.SetKey(Properties.Settings.Default.selectedUnityCNKey);
