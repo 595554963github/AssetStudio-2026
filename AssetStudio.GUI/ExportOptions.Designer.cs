@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Windows.Forms;
 using System.Xml.Linq;
@@ -298,7 +298,7 @@ namespace AssetStudio.GUI
             minimalAssetMap.Name = "minimalAssetMap";
             minimalAssetMap.Size = new System.Drawing.Size(125, 19);
             minimalAssetMap.TabIndex = 17;
-            minimalAssetMap.Text = "最小资产图";
+            minimalAssetMap.Text = "最小资源图";
             minimalAssetMap.UseVisualStyleBackColor = true;
             // 
             // assetGroupOptions
@@ -320,12 +320,12 @@ namespace AssetStudio.GUI
             label7.Name = "label7";
             label7.Size = new System.Drawing.Size(140, 15);
             label7.TabIndex = 11;
-            label7.Text = "对导出的资产进行分组";
+            label7.Text = "对导出的资源进行分组";
             // 
             // openAfterExport
             // 
             openAfterExport.AutoSize = true;
-            openAfterExport.Checked = true;
+            openAfterExport.Checked = false;
             openAfterExport.CheckState = CheckState.Checked;
             openAfterExport.Location = new System.Drawing.Point(7, 78);
             openAfterExport.Margin = new Padding(4);
@@ -345,7 +345,7 @@ namespace AssetStudio.GUI
             restoreExtensionName.Name = "restoreExtensionName";
             restoreExtensionName.Size = new System.Drawing.Size(204, 19);
             restoreExtensionName.TabIndex = 9;
-            restoreExtensionName.Text = "恢复文本资产扩展名";
+            restoreExtensionName.Text = "恢复文本资源扩展名";
             restoreExtensionName.UseVisualStyleBackColor = true;
             // 
             // key
@@ -520,7 +520,7 @@ namespace AssetStudio.GUI
             exportBlendShape.Name = "exportBlendShape";
             exportBlendShape.Size = new System.Drawing.Size(124, 19);
             exportBlendShape.TabIndex = 22;
-            exportBlendShape.Text = "导出混合形状";
+            exportBlendShape.Text = "导出变形目标";
             exportBlendShape.UseVisualStyleBackColor = true;
             // 
             // exportAnimations
